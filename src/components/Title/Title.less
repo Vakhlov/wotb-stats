@@ -1,0 +1,27 @@
+:local {
+	.title {
+		display: flex;
+		margin-bottom: 20px;
+
+		@media (min-width: 1024px) {
+			grid-area: title;
+			margin-bottom: 0;
+		}
+	}
+
+	.name {
+		flex-basis: auto;
+		flex-grow: 1;
+		flex-shrink: 0;
+
+		@media (min-width: 1024px) {
+			padding-left: 15px;
+		}
+	}
+
+	.hitsPercentage {
+		flex-basis: 70px;
+		flex-grow: 0;
+		flex-shrink: 0;
+	}
+}

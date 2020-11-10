@@ -1,0 +1,123 @@
+:local {
+	.root {
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 14px;
+		margin: 0 auto;
+		max-width: 1024px;
+		padding: 15px;
+	}
+
+	.sheet {
+		@media (min-width: 640px) {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-evenly;
+		}
+	}
+
+	.head {
+		display: none;
+
+		@media (min-width: 1024px) {
+			align-items: center;
+			display: grid;
+			font-size: 12px;
+			font-weight: bold;
+			gap: 5px;
+			grid-template-areas: "titleAndPercentage achievements";
+			grid-template-columns: 250px auto;
+			margin-bottom: 10px;
+			width: 100%;
+		}
+	}
+
+	.titleAndPercentage {
+		align-items: center;
+		display: grid;
+		gap: 0;
+		grid-area: titleAndPercentage;
+		grid-template-areas: "title percentage";
+		grid-template-columns: 180px 70px;
+	}
+
+	.title {
+		grid-area: title;
+		padding-left: 15px
+	}
+
+	.percentage {
+		grid-area: percentage;
+	}
+
+	.achievements {
+		display: flex;
+		flex-wrap: wrap;
+		grid-area: achievements;
+		justify-content: space-evenly;
+		text-align: center;
+	}
+
+	.control {
+		margin-right: 20px;
+	}
+
+	.addAccountForm {
+		font-family: Arial, Helvetica, sans-serif;
+		margin: 0 auto;
+		max-width: 600px;
+		padding: 20px 0;
+	}
+
+	.addAccountFormField {
+		padding-bottom: 20px;
+
+		label {
+			display: block;
+			font-size: 13px;
+			line-height: 20px;
+		}
+
+		input {
+			border: 1px solid #999;
+			box-sizing: border-box;
+			font-size: 14px;
+			height: 32px;
+			line-height: 32px;
+			padding: 0 8px;
+			width: 100%;
+
+			&:focus {
+				border-color: #000;
+				outline: none;
+			}
+		}
+	}
+
+	.searchResults {
+		border-color: #DDD;
+		border-style: solid;
+		border-width: 0 1px 1px 1px;
+	}
+
+	.searchResultsItem {
+		border: none;
+		background: none;
+		font-size: 14px;
+		line-height: 32px;
+		margin: 0;
+		padding: 0 8px;
+		text-align: left;
+		white-space: nowrap;
+		width: 100%;
+
+		&:hover,
+		&:focus {
+			background: #EFEFEF;
+			outline: none;
+		}
+
+		&:active {
+			background: #DDD;
+		}
+	}
+}

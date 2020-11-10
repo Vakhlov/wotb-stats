@@ -1,0 +1,23 @@
+{
+  "presets": [
+    [
+			"@babel/preset-env",
+			{
+				"targets": {
+					"browsers": ["last 2 versions", ">1%"]
+				}
+			}
+		],
+		"@babel/preset-react",
+		"@babel/preset-flow"
+	],
+  "plugins": [
+    [
+			"@babel/plugin-transform-react-jsx",
+			{ "pragma": "h" }
+		],
+		"@babel/plugin-proposal-class-properties",
+		"@babel/plugin-transform-flow-strip-types",
+		"@babel/plugin-proposal-object-rest-spread"
+  ]
+}

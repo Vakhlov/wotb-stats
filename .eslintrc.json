@@ -1,0 +1,34 @@
+{
+	"env": {
+		"browser": true,
+		"es6": true,
+		"jest": true,
+		"node": true
+	},
+	"extends": ["eslint:recommended", "standard", "plugin:react/recommended", "plugin:promise/recommended"],
+	"parser": "babel-eslint",
+	"plugins": [
+		"standard",
+		"promise",
+		"react",
+		"flowtype",
+		"jest"
+	],
+	"rules": {
+		"curly": 0,
+		"flowtype/define-flow-type": 1,
+		"flowtype/use-flow-type": 1,
+		"indent": [0, "tab"],
+		"no-tabs": 0,
+		"object-curly-spacing": 0,
+		"operator-linebreak": ["error", "before"],
+		"quote-props": ["error", "as-needed", {"unnecessary": false}],
+		"semi": [2, "always"]
+	},
+	"settings": {
+		"react": {
+			"flowVersion": "0.142",
+			"pragma": "h"
+		}
+	}
+}
