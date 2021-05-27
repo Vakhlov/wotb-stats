@@ -2,11 +2,11 @@
   "author": {
     "email": "vakhlov@gmail.com",
     "name": "Alexander Vakhlov",
-    "url": ""
+    "url": "https://github.com/Vakhlov"
   },
   "bugs": {
     "email": "vakhlov@gmail.com",
-    "url": ""
+    "url": "https://github.com/Vakhlov/wotb-stats/issues"
   },
   "contributors": [],
   "description": "WoT Blitz player's statistics analyzer",
@@ -93,7 +93,7 @@
     "analyzer"
   ],
   "license": "ISC",
-  "main": "../src/index.js",
+  "main": "./src/index.js",
   "name": "wotb-stats",
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack serve --config ./webpack/config.js",
