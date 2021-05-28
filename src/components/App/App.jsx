@@ -273,32 +273,40 @@ export class App extends Component<Props, State> {
 
 		// поиск индекса учетной записи для изменения
 		const accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
-		const accountToEdit = accounts.findIndex(account => account.id === currentAccount);
+		let accountToEdit;
 
-		// замена временного объекта для вывода вкладки действительным объектом
-		const newAccounts = [
-			...accounts.slice(0, accountToEdit),
-			{id: value, name: title},
-			...accounts.slice(accountToEdit + 1)
-		];
+		if (accounts.length) {
+			accountToEdit = accounts.findIndex(account => account.id === currentAccount);
+		} else {
+			accountToEdit = 0;
+		}
 
-		// сохранение информации в состояние приложения, обновление данных в хранилище и загрузка
-		// данных для созданной вкладки
-		this.setState(
-			{
-				accounts: newAccounts,
-				currentAccount: value,
-				searchResults: []
-			},
-			() => {
-				// обновление информации об учетных записях и выбранной учетной записи в локальном хранилище
-				localStorage.setItem('accounts', JSON.stringify(newAccounts));
-				localStorage.setItem('selectedAccountId', value);
+		if (accountToEdit >= 0) {
+			// замена временного объекта для вывода вкладки действительным объектом
+			const newAccounts = [
+				...accounts.slice(0, accountToEdit),
+				{id: value, name: title},
+				...accounts.slice(accountToEdit + 1)
+			];
 
-				// загрузка данных для выбранной учетной записи
-				this.loadData();
-			}
-		);
+			// сохранение информации в состояние приложения, обновление данных в хранилище и загрузка
+			// данных для созданной вкладки
+			this.setState(
+				{
+					accounts: newAccounts,
+					currentAccount: value,
+					searchResults: []
+				},
+				() => {
+					// обновление информации об учетных записях и выбранной учетной записи в локальном хранилище
+					localStorage.setItem('accounts', JSON.stringify(newAccounts));
+					localStorage.setItem('selectedAccountId', value);
+
+					// загрузка данных для выбранной учетной записи
+					this.loadData();
+				}
+			);
+		}
 	};
 
 	/**
@@ -448,6 +456,14 @@ export class App extends Component<Props, State> {
 		);
 	};
 
+	renderStartForm () {
+		const {accounts} = this.state;
+
+		if (accounts.length === 0) {
+			return this.renderAddAccountForm();
+		}
+	}
+
 	/**
 	 * Выводит содержимое вкладки.
 	 */
@@ -485,28 +501,32 @@ export class App extends Component<Props, State> {
 	renderTabs () {
 		const {accounts, currentAccount} = this.state;
 
-		// индекс выбранной вкладки
-		const accountIndex = accounts.findIndex(account => account.id === currentAccount);
-		const selected = accountIndex >= 0 ? accountIndex : 0;
+		if (accounts.length) {
+			// индекс выбранной вкладки
+			const accountIndex = accounts.findIndex(account => account.id === currentAccount);
+			const selected = accountIndex >= 0 ? accountIndex : 0;
 
-		// вкладки и их содержимое
-		const tabs = accounts.map((account: Account) => {
-			const {id, name} = account;
-			const content = this.renderTabContent(id);
-			return <Tab key={id} caption={name}>{content}</Tab>;
-		});
+			// вкладки и их содержимое
+			const tabs = accounts.map((account: Account) => {
+				const {id, name} = account;
+				const content = this.renderTabContent(id);
+				return <Tab key={id} caption={name}>{content}</Tab>;
+			});
 
-		return (
-			<Tabs
-				editable={true}
-				onAdd={this.handleAccountAdd}
-				onClose={this.handleAccountRemove}
-				onSwitch={this.handleAccountChange}
-				selected={selected}
-			>
-				{tabs}
-			</Tabs>
-		);
+			return (
+				<Tabs
+					editable={true}
+					onAdd={this.handleAccountAdd}
+					onClose={this.handleAccountRemove}
+					onSwitch={this.handleAccountChange}
+					selected={selected}
+				>
+					{tabs}
+				</Tabs>
+			);
+		}
+
+		return null;
 	}
 
 	/**
@@ -522,6 +542,7 @@ export class App extends Component<Props, State> {
 				<div className={styles.root}>
 					{this.renderUpdateButton()}
 					{this.renderTabs()}
+					{this.renderStartForm()}
 				</div>
 			);
 		}
