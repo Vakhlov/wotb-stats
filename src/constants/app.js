@@ -55,6 +55,7 @@ const paths: CommonMap = {
  */
 const removedVehicles: CommonMap = {
 	'545': 'T1',
+	'577': 'Renault FT',
 	'1329': 'NC-31',
 	'3329': 'MC-1'
 };
@@ -68,6 +69,11 @@ const requiredParams: RequiredParams = {
 	[paths.tanksAchievements]: ['id'],
 	[paths.tanksStats]: ['id']
 };
+
+/**
+ * Ограничение количества результатов поиска.
+ */
+const searchResultsLimit = 10;
 
 /**
  * Сервер `API`.
@@ -96,6 +102,7 @@ export {
 	paths,
 	removedVehicles,
 	requiredParams,
+	searchResultsLimit,
 	server,
 	tempIdPattern,
 	tempNamePattern

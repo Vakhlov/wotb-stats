@@ -8,6 +8,7 @@ export type State = {
 	achievements: Array<VehicleAchievements>,
 	achievementDescriptions: AchievementDescriptions,
 	currentAccount: string | null,
+	loading: boolean,
 	searchResults: Array<Option>,
 	sortField: string,
 	vehicleInfo: VehicleInfo,

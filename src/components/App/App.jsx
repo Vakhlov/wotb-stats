@@ -41,6 +41,7 @@ export class App extends Component<Props, State> {
 			accounts,
 			achievements: [],
 			achievementDescriptions: {},
+			loading: true,
 			currentAccount: localStorage.getItem('selectedAccountId') || selectedAccountId,
 			searchResults: [],
 			sortField: 'hitsPercentage',
@@ -92,7 +93,13 @@ export class App extends Component<Props, State> {
 	// Сеттеры отдельных свойств состояния. Оформлены как отдельные функции только ради повышения
 	// удобочитаемости загрузчика (`loadData`).
 	setAchievements = (achievements: Array<VehicleAchievements>): void => {
-		this.setState({achievements});
+		const {vehicleStats} = this.state;
+
+		// Хрупкая логика здесь и в `setVehicleStats`: загрузка завершена когда есть и статистика, и достижения.
+		this.setState({
+			achievements,
+			loading: vehicleStats.length === 0 && achievements.length > 0
+		});
 	};
 
 	setAchievementDescriptions = (achievementDescriptions: AchievementDescriptions): void => {
@@ -108,7 +115,13 @@ export class App extends Component<Props, State> {
 	};
 
 	setVehicleStats = (vehicleStats: Array<VehicleStats>): void => {
-		this.setState({vehicleStats});
+		const {achievements} = this.state;
+
+		// Хрупкая логика здесь и в `setAchievements`: загрузка завершена когда есть и статистика, и достижения.
+		this.setState({
+			vehicleStats,
+			loading: achievements.length === 0 && vehicleStats.length > 0
+		});
 	};
 
 	// Вспомогательные функции
@@ -169,6 +182,17 @@ export class App extends Component<Props, State> {
 	getVehiclePreview (vehicleId: number): string {
 		const {vehicleInfo} = this.state;
 		return vehicleInfo[vehicleId] ? vehicleInfo[vehicleId].preview : '';
+	}
+
+	/**
+	 * Устанавливает фокус в поле поиска спустя треть секунды после его вывода.
+	 * Использование атрибута `autoFocus` у поля ввода не всегда возможно (в консоль браузера выводится
+	 * сообщение `Autofocus processing was blocked because a document already has a focused element`).
+	 */
+	setFocusToSearchInput () {
+		setTimeout(() => {
+			this.search.current && this.search.current.focus();
+		}, 300);
 	}
 
 	/**
@@ -249,6 +273,7 @@ export class App extends Component<Props, State> {
 					{
 						achievements: [],
 						currentAccount: accountId,
+						loading: true,
 						vehicleStats: []
 					},
 					() => this.loadData()
@@ -273,32 +298,41 @@ export class App extends Component<Props, State> {
 
 		// поиск индекса учетной записи для изменения
 		const accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
-		const accountToEdit = accounts.findIndex(account => account.id === currentAccount);
+		let accountToEdit;
 
-		// замена временного объекта для вывода вкладки действительным объектом
-		const newAccounts = [
-			...accounts.slice(0, accountToEdit),
-			{id: value, name: title},
-			...accounts.slice(accountToEdit + 1)
-		];
+		if (accounts.length) {
+			accountToEdit = accounts.findIndex(account => account.id === currentAccount);
+		} else {
+			accountToEdit = 0;
+		}
 
-		// сохранение информации в состояние приложения, обновление данных в хранилище и загрузка
-		// данных для созданной вкладки
-		this.setState(
-			{
-				accounts: newAccounts,
-				currentAccount: value,
-				searchResults: []
-			},
-			() => {
-				// обновление информации об учетных записях и выбранной учетной записи в локальном хранилище
-				localStorage.setItem('accounts', JSON.stringify(newAccounts));
-				localStorage.setItem('selectedAccountId', value);
+		if (accountToEdit >= 0) {
+			// замена временного объекта для вывода вкладки действительным объектом
+			const newAccounts = [
+				...accounts.slice(0, accountToEdit),
+				{id: value, name: title},
+				...accounts.slice(accountToEdit + 1)
+			];
 
-				// загрузка данных для выбранной учетной записи
-				this.loadData();
-			}
-		);
+			// сохранение информации в состояние приложения, обновление данных в хранилище и загрузка
+			// данных для созданной вкладки
+			this.setState(
+				{
+					accounts: newAccounts,
+					currentAccount: value,
+					loading: true,
+					searchResults: []
+				},
+				() => {
+					// обновление информации об учетных записях и выбранной учетной записи в локальном хранилище
+					localStorage.setItem('accounts', JSON.stringify(newAccounts));
+					localStorage.setItem('selectedAccountId', value);
+
+					// загрузка данных для выбранной учетной записи
+					this.loadData();
+				}
+			);
+		}
 	};
 
 	/**
@@ -352,7 +386,14 @@ export class App extends Component<Props, State> {
 	 * Обработчик события программного обновления страницы.
 	 */
 	handleUpdate = () => {
-		this.loadData();
+		this.setState(
+			{
+				loading: true
+			},
+			() => {
+				this.loadData();
+			}
+		);
 	};
 
 	// Методы вывода информации на страницу
@@ -365,20 +406,26 @@ export class App extends Component<Props, State> {
 		// вывод результатов поиска
 		const results = searchResults.map((item: Option) => {
 			return (
-				<button className={styles.searchResultsItem} key={item.value} onClick={this.handleAccountEdit(item)}>
+				<button
+					className={styles.searchResultsItem}
+					key={item.value}
+					onClick={this.handleAccountEdit(item)}
+					type="button"
+				>
 					{item.title}
 				</button>
 			);
 		});
 
+		this.setFocusToSearchInput();
+
 		// вывод формы с результатами поиска
 		return (
-			<form className={styles.addAccountForm}>
+			<form className={styles.addAccountForm} onSubmit={event => event.preventDefault()}>
 				<div className={styles.addAccountFormField}>
 					<label htmlFor="accountId">Имя пользователя</label>
 					<input
 						autoComplete="off"
-						autoFocus
 						id="accountId"
 						name="accountId"
 						onKeyUp={this.handleSearchChange}
@@ -427,6 +474,20 @@ export class App extends Component<Props, State> {
 		}
 	}
 
+	renderNoDataMessage () {
+		const {loading} = this.state;
+
+		if (loading === false) {
+			return (
+				<div className={styles.noDataMessage}>
+					Не удалось получить данные для этой учетной записи. Возможно, она была удалена.
+				</div>
+			);
+		}
+
+		return null;
+	}
+
 	/**
 	 * Выводит отдельную запись о технике.
 	 */
@@ -448,11 +509,19 @@ export class App extends Component<Props, State> {
 		);
 	};
 
+	renderStartForm () {
+		const {accounts} = this.state;
+
+		if (accounts.length === 0) {
+			return this.renderAddAccountForm();
+		}
+	}
+
 	/**
 	 * Выводит содержимое вкладки.
 	 */
 	renderTabContent (accountId: string) {
-		const {currentAccount} = this.state;
+		const {currentAccount, loading, vehicleStats} = this.state;
 
 		// если вкладка не связана с учетной записью, выводится форма поиска и добавления учетной записи
 		if (accountIdIsPermanent(accountId) === false) {
@@ -461,7 +530,7 @@ export class App extends Component<Props, State> {
 
 		// если вкладка связана с учетной записью, выводятся данные этой учетной записи
 		if (accountId === currentAccount) {
-			return this.renderTable();
+			return vehicleStats.length && loading === false ? this.renderTable() : this.renderNoDataMessage();
 		}
 
 		return null;
@@ -485,28 +554,32 @@ export class App extends Component<Props, State> {
 	renderTabs () {
 		const {accounts, currentAccount} = this.state;
 
-		// индекс выбранной вкладки
-		const accountIndex = accounts.findIndex(account => account.id === currentAccount);
-		const selected = accountIndex >= 0 ? accountIndex : 0;
+		if (accounts.length) {
+			// индекс выбранной вкладки
+			const accountIndex = accounts.findIndex(account => account.id === currentAccount);
+			const selected = accountIndex >= 0 ? accountIndex : 0;
 
-		// вкладки и их содержимое
-		const tabs = accounts.map((account: Account) => {
-			const {id, name} = account;
-			const content = this.renderTabContent(id);
-			return <Tab key={id} caption={name}>{content}</Tab>;
-		});
+			// вкладки и их содержимое
+			const tabs = accounts.map((account: Account) => {
+				const {id, name} = account;
+				const content = this.renderTabContent(id);
+				return <Tab key={id} caption={name}>{content}</Tab>;
+			});
 
-		return (
-			<Tabs
-				editable={true}
-				onAdd={this.handleAccountAdd}
-				onClose={this.handleAccountRemove}
-				onSwitch={this.handleAccountChange}
-				selected={selected}
-			>
-				{tabs}
-			</Tabs>
-		);
+			return (
+				<Tabs
+					editable={true}
+					onAdd={this.handleAccountAdd}
+					onClose={this.handleAccountRemove}
+					onSwitch={this.handleAccountChange}
+					selected={selected}
+				>
+					{tabs}
+				</Tabs>
+			);
+		}
+
+		return null;
 	}
 
 	/**
@@ -522,6 +595,7 @@ export class App extends Component<Props, State> {
 				<div className={styles.root}>
 					{this.renderUpdateButton()}
 					{this.renderTabs()}
+					{this.renderStartForm()}
 				</div>
 			);
 		}

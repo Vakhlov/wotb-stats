@@ -1,5 +1,6 @@
 // @flow
-import {achievementFields} from 'constants/app';
+import {accountIdIsPermanent} from 'helpers/common';
+import {achievementFields, searchResultsLimit} from 'constants/app';
 
 /**
  * Отсеивает описания достижений в соответствии с набором нужных достижений.
@@ -39,6 +40,24 @@ const filterAchievementDescriptionsData = (data: Object): Object => {
 };
 
 /**
+ * Исключает данные, уже использующиеся в приложении из результатов поиска.
+ * @param {Array<Object>} data - результаты поиска, полученные с сервера. Формат:
+ * [
+ *   {
+ *     "account_id": number,
+ *     "nickname": string
+ *   }
+ * ]
+ * @returns {Array<Object>} - возвращает результаты поиска без данных, уже использующихся в прилжении.
+ */
+const filterSearchResults = (data: Array<Object>): Array<Object> => {
+	const accounts = JSON.parse(localStorage.getItem('accounts') || '[]') || [];
+	const ids = accounts.map(account => account.id).filter(accountIdIsPermanent).map(Number);
+
+	return data.filter(item => ids.includes(item.account_id) === false);
+};
+
+/**
  * Отсеивает достижения в соответствии с набором нужных достижений.
  * @param {Array<Object>} data - данные с сервера. Формат:
  * [
@@ -71,7 +90,16 @@ const filterVehicleAchievements = (data: Array<Object>): Array<Object> => {
 	return result;
 };
 
+/**
+ * Ограничивает количесвто результатов.
+ */
+const limitSearchResults = (data: Array<Object>): Array<Object> => {
+	return data.length > searchResultsLimit ? data.slice(0, searchResultsLimit) : data;
+};
+
 export {
 	filterAchievementDescriptionsData,
-	filterVehicleAchievements
+	filterSearchResults,
+	filterVehicleAchievements,
+	limitSearchResults
 };

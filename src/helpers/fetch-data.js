@@ -10,8 +10,14 @@ import type {
 	VehicleInfo,
 	VehicleStats
 } from 'types';
-import {api, appId, defaultRequestOptions, paths, requiredParams, server} from 'constants/app';
-import {filterAchievementDescriptionsData, filterVehicleAchievements} from 'helpers/filters';
+import {api, appId, defaultRequestOptions, paths, requiredParams, searchResultsLimit, server} from 'constants/app';
+import {countPermanentAccounts} from 'helpers/common';
+import {
+	filterAchievementDescriptionsData,
+	filterVehicleAchievements,
+	filterSearchResults,
+	limitSearchResults
+} from 'helpers/filters';
 import {
 	toAchievementDescriptions,
 	toArray,
@@ -111,6 +117,7 @@ const fetchAchievements = (id: string): Promise<Array<VehicleAchievements>> => {
 const fetchData = (partialUrl: string, options: CommonMap = {}): Promise<any> => {
 	if (checkOptions(partialUrl, options)) {
 		// делаем запрос только если объект с `GET`-параметрами содержит все необходимые `GET`-параметры.
+
 		const normalizedOptions = normalizeOptions(options);// нормализуем объект настроек
 
 		return fetch(getUrl(partialUrl, normalizedOptions))	// выполняем запрос,
@@ -171,7 +178,7 @@ const getUrl = (partialUrl: string, options: RequestOptions = defaultRequestOpti
 	// По блоку методов и методу определяем список полей ответа и `GET`-параметры запроса
 	switch (partialUrl) {
 		case paths.accountList:
-			params.push('limit=10');
+			params.push(`limit=${searchResultsLimit + countPermanentAccounts()}`);
 			params.push(`search=${search}`);
 			break;
 		case paths.encyclopediaAchievements:
@@ -223,6 +230,8 @@ const search = (search: string): Promise<Array<Option>> => {
 	return fetchData(paths.accountList, {search})					// выполняем запрос,
 		.then(checkResponseStatus)													// проверяем статус ответа,
 		.then(response => response.data)										// получаем основные данные,
+		.then(filterSearchResults)													// исключаем уже существующие учетные записи,
+		.then(limitSearchResults)														// ограничиваем количество результатов,
 		.then(toSearchOptions);															// преобразуем в нужный формат.
 };
 
