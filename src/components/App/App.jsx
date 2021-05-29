@@ -172,6 +172,17 @@ export class App extends Component<Props, State> {
 	}
 
 	/**
+	 * Устанавливает фокус в поле поиска спустя треть секунды после его вывода.
+	 * Использование атрибута `autoFocus` у поля ввода не всегда возможно (в консоль браузера выводится
+	 * сообщение `Autofocus processing was blocked because a document already has a focused element`).
+	 */
+	setFocusToSearchInput () {
+		setTimeout(() => {
+			this.search.current && this.search.current.focus();
+		}, 300);
+	}
+
+	/**
 	 * Сортирует массив объектов со статистикой по технике по выбранному ключу. Пока ключ не выбирается динамически
 	 * и всегда соответствует статистике попаданий (`hitsPercentage`).
 	 */
@@ -373,20 +384,26 @@ export class App extends Component<Props, State> {
 		// вывод результатов поиска
 		const results = searchResults.map((item: Option) => {
 			return (
-				<button className={styles.searchResultsItem} key={item.value} onClick={this.handleAccountEdit(item)}>
+				<button
+					className={styles.searchResultsItem}
+					key={item.value}
+					onClick={this.handleAccountEdit(item)}
+					type="button"
+				>
 					{item.title}
 				</button>
 			);
 		});
 
+		this.setFocusToSearchInput();
+
 		// вывод формы с результатами поиска
 		return (
-			<form className={styles.addAccountForm}>
+			<form className={styles.addAccountForm} onSubmit={event => event.preventDefault()}>
 				<div className={styles.addAccountFormField}>
 					<label htmlFor="accountId">Имя пользователя</label>
 					<input
 						autoComplete="off"
-						autoFocus
 						id="accountId"
 						name="accountId"
 						onKeyUp={this.handleSearchChange}
