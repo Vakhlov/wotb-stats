@@ -15,7 +15,9 @@ module.exports = [
 	}),
 	new HtmlWebpackPlugin({
 		filename: 'index.html',
-		template: 'index.html',
-		title: ''
+		data: {
+			copyright: `© Vakhlov ${(new Date()).getFullYear()}`
+		},
+		template: 'index.html'
 	})
 ];

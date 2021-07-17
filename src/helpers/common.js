@@ -11,6 +11,15 @@ import {tempIdPattern} from 'constants/app';
 const accountIdIsPermanent = (accountId: string): boolean => accountId.indexOf(tempIdPattern) === -1;
 
 /**
+ * Определяет количество постоянных вкладок.
+ * @returns {number} - возвращает количество постоянных вкладок.
+ */
+const countPermanentAccounts = (): number => {
+	const accounts = JSON.parse(localStorage.getItem('accounts') || '[]') || [];
+	return accounts.filter(account => accountIdIsPermanent(account.id)).length;
+};
+
+/**
  * Выводит сообщение об ошибке в консоль браузера. Если сообщение можно преобразовать в `JSON` типа `APIResponse`,
  * выводится сообщение из него.
  * @param {Error} error - объект ошибки.
@@ -35,6 +44,7 @@ const noop = () => {};
 
 export {
 	accountIdIsPermanent,
+	countPermanentAccounts,
 	logError,
 	noop
 };

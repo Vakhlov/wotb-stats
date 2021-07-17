@@ -1,6 +1,13 @@
 // @flow
 import {achievementDescriptionsResponse, vehicleAchievementsResponse} from 'mocks/data';
-import {filterAchievementDescriptionsData, filterVehicleAchievements} from 'helpers/filters';
+import {
+	filterAchievementDescriptionsData,
+	filterSearchResults,
+	filterVehicleAchievements,
+	limitSearchResults
+} from 'helpers/filters';
+import {LocalStorageMock} from 'mocks/local-storage';
+import {searchResultsLimit} from 'constants/app';
 
 describe('Filter functions', () => {
 	/**
@@ -21,6 +28,28 @@ describe('Filter functions', () => {
 		const filteredData = filterAchievementDescriptionsData(achievementDescriptionsResponse.data);
 
 		expect(filteredData).toMatchObject(desiredObject);
+	});
+
+	/**
+	 * Проверят, что функция `filterSearchResults` удаляет уже используемые в приложении данные из результатов поиска.
+	 */
+	it('removes data already in usage from search results', () => {
+		global.localStorage = new LocalStorageMock();
+
+		const alreadyInUse = {account_id: 1, nickname: 'nickname1'};
+		const accounts = [{id: '1', name: 'nickname1'}];
+
+		localStorage.setItem('accounts', JSON.stringify(accounts));
+
+		const arr = [
+			alreadyInUse,
+			{account_id: 2, nickname: 'nickname2'},
+			{account_id: 3, nickname: 'nickname3'}
+		];
+
+		const result = filterSearchResults(arr);
+
+		expect(result.findIndex(item => item === alreadyInUse)).toBe(-1);
 	});
 
 	/**
@@ -49,4 +78,28 @@ describe('Filter functions', () => {
 
 		expect(fitleredData).toMatchObject([desiredObject1, desiredObject2]);
 	});
+
+	/**
+	 * Проверяет, что функция `limitSearchResults` правильно ограничивает количество результатов поиска.
+	 */
+	it('limits search result count correctly', () => {
+		const arr1 = [];
+		const arr2 = [];
+
+		for (let i = 0; i < searchResultsLimit; i++) {
+			if (i < 3) {
+				arr1.push({account_id: i, nickname: `nickname${i}`});
+			}
+
+			arr2.push({account_id: i, nickname: `nickname${i}`});
+		}
+
+		expect(limitSearchResults(arr1).length).toBe(arr1.length);
+		expect(limitSearchResults(arr2).length).toBe(searchResultsLimit);
+	});
+
+	/**
+	 * Очистка.
+	 */
+	afterEach(() => localStorage.removeItem('accounts'));
 });
