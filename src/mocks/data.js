@@ -83,6 +83,32 @@ const achievementDescriptionsResponse = {
 const achievements = ['markOfMasteryI', 'markOfMasteryII', 'markOfMasteryIII'];
 
 /**
+ * Пример ответа на запрос информации о достижения в случае когда этой информации нет.
+ */
+const noAchievementsResponse = {
+	data: {
+		1: null
+	},
+	meta: {
+		count: 1
+	},
+	status: 'ok'
+};
+
+/**
+ * Пример ответа на запрос информации о статистике в случае когда этой информации нет.
+ */
+const noVehicleStatsResponse = {
+	data: {
+		1: null
+	},
+	meta: {
+		count: 1
+	},
+	status: 'ok'
+};
+
+/**
  * Пример ответа на поисковый запрос.
  */
 const searchResponse = {
@@ -197,6 +223,8 @@ export {
 	achievementDescriptions,
 	achievementDescriptionsResponse,
 	achievements,
+	noAchievementsResponse,
+	noVehicleStatsResponse,
 	searchResponse,
 	vehicleAchievementsResponse,
 	vehicleInfoResponse,

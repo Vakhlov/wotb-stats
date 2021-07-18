@@ -2,6 +2,8 @@
 /** @jsx h */
 import {
 	achievementDescriptionsResponse,
+	noAchievementsResponse,
+	noVehicleStatsResponse,
 	vehicleAchievementsResponse,
 	vehicleInfoResponse,
 	vehicleStatsResponse
@@ -99,6 +101,7 @@ describe('App', () => {
 		expect(wrapper.find('.head .percentage.t-right')).toHaveLength(1);
 		expect(wrapper.find('.head .achievements')).toHaveLength(1);
 		expect(wrapper.find('.head .achievements .l-cell')).toHaveLength(Object.keys(wrapper.state().achievementDescriptions).length);
+		expect(wrapper.find('.noDataMessage')).toHaveLength(0);
 		expect(wrapper.find(Record)).toHaveLength(wrapper.state().vehicleStats.length);
 	});
 
@@ -162,6 +165,38 @@ describe('App', () => {
 		// проверки
 		expect(accounts).toEqual(expectedAccounts);
 		expect(selectedAccountId).toEqual(expectedSelectedAccountId);
+	});
+
+	/**
+	 * Проверяет, что в случае отсутствия данных для указанной учетной записи выводится сообщение об этом.
+	 */
+	it('show special message when no data found for specified account', async () => {
+		// подготовка локального хранилища
+		localStorage.setItem('accounts', JSON.stringify([{id: '1', name: 'nameOne'}]));
+		localStorage.setItem('selectedAccountId', '1');
+
+		// подготовка ответов на запросы, инициируемые компонентом
+		fetchMock.get(
+			getUrl(paths.tanksAchievements, normalizeOptions({id: '1'})),
+			Promise.resolve(noAchievementsResponse)
+		);
+
+		fetchMock.get(
+			getUrl(paths.tanksStats, normalizeOptions({id: '1'})),
+			Promise.resolve(noVehicleStatsResponse)
+		);
+
+		// монтирование компонента
+		const wrapper = shallow(<App />);
+
+		// ожидание "выполения" запросов и "перерисовки" компонента
+		await sleep(3000);
+
+		// обновление обертки
+		wrapper.update();
+
+		// проверки
+		expect(wrapper.find('.noDataMessage')).toHaveLength(1);
 	});
 
 	/**

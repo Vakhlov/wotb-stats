@@ -41,6 +41,7 @@ export class App extends Component<Props, State> {
 			accounts,
 			achievements: [],
 			achievementDescriptions: {},
+			loading: true,
 			currentAccount: localStorage.getItem('selectedAccountId') || selectedAccountId,
 			searchResults: [],
 			sortField: 'hitsPercentage',
@@ -92,7 +93,13 @@ export class App extends Component<Props, State> {
 	// Сеттеры отдельных свойств состояния. Оформлены как отдельные функции только ради повышения
 	// удобочитаемости загрузчика (`loadData`).
 	setAchievements = (achievements: Array<VehicleAchievements>): void => {
-		this.setState({achievements});
+		const {vehicleStats} = this.state;
+
+		// Хрупкая логика здесь и в `setVehicleStats`: загрузка завершена когда есть и статистика, и достижения.
+		this.setState({
+			achievements,
+			loading: vehicleStats.length === 0 && achievements.length > 0
+		});
 	};
 
 	setAchievementDescriptions = (achievementDescriptions: AchievementDescriptions): void => {
@@ -108,7 +115,13 @@ export class App extends Component<Props, State> {
 	};
 
 	setVehicleStats = (vehicleStats: Array<VehicleStats>): void => {
-		this.setState({vehicleStats});
+		const {achievements} = this.state;
+
+		// Хрупкая логика здесь и в `setAchievements`: загрузка завершена когда есть и статистика, и достижения.
+		this.setState({
+			vehicleStats,
+			loading: achievements.length === 0 && vehicleStats.length > 0
+		});
 	};
 
 	// Вспомогательные функции
@@ -260,6 +273,7 @@ export class App extends Component<Props, State> {
 					{
 						achievements: [],
 						currentAccount: accountId,
+						loading: true,
 						vehicleStats: []
 					},
 					() => this.loadData()
@@ -306,6 +320,7 @@ export class App extends Component<Props, State> {
 				{
 					accounts: newAccounts,
 					currentAccount: value,
+					loading: true,
 					searchResults: []
 				},
 				() => {
@@ -371,7 +386,14 @@ export class App extends Component<Props, State> {
 	 * Обработчик события программного обновления страницы.
 	 */
 	handleUpdate = () => {
-		this.loadData();
+		this.setState(
+			{
+				loading: true
+			},
+			() => {
+				this.loadData();
+			}
+		);
 	};
 
 	// Методы вывода информации на страницу
@@ -452,6 +474,20 @@ export class App extends Component<Props, State> {
 		}
 	}
 
+	renderNoDataMessage () {
+		const {loading} = this.state;
+
+		if (loading === false) {
+			return (
+				<div className={styles.noDataMessage}>
+					Не удалось получить данные для этой учетной записи. Возможно, она была удалена.
+				</div>
+			);
+		}
+
+		return null;
+	}
+
 	/**
 	 * Выводит отдельную запись о технике.
 	 */
@@ -485,7 +521,7 @@ export class App extends Component<Props, State> {
 	 * Выводит содержимое вкладки.
 	 */
 	renderTabContent (accountId: string) {
-		const {currentAccount} = this.state;
+		const {currentAccount, loading, vehicleStats} = this.state;
 
 		// если вкладка не связана с учетной записью, выводится форма поиска и добавления учетной записи
 		if (accountIdIsPermanent(accountId) === false) {
@@ -494,7 +530,7 @@ export class App extends Component<Props, State> {
 
 		// если вкладка связана с учетной записью, выводятся данные этой учетной записи
 		if (accountId === currentAccount) {
-			return this.renderTable();
+			return vehicleStats.length && loading === false ? this.renderTable() : this.renderNoDataMessage();
 		}
 
 		return null;
