@@ -13,9 +13,9 @@ import fetchMock from 'fetch-mock';
 import {getUrl, normalizeOptions} from 'helpers/fetch-data';
 import {h} from 'preact';
 import {LocalStorageMock} from 'mocks/local-storage';
+import {mount, shallow} from 'enzyme';
 import {paths} from 'constants/app';
 import Record from 'components/Record';
-import {shallow} from 'enzyme';
 import Tab from 'components/Tabs/Tab';
 import Tabs from 'components/Tabs';
 
@@ -24,7 +24,7 @@ import Tabs from 'components/Tabs';
  *
  * Подменяется для целей тестирования. В хранилище записывается ненастоящий идентификатор учетной записи, который
  * позже используется компонентом `App` как аргумент для функций получения данных. Также в хранилище записывается
- * информация об учетных записях (название и идентификатор), потому что иначе App считает настоящие идентификаторы,
+ * информация об учетных записях (название и идентификатор), потому что иначе `App` считает настоящие идентификаторы,
  * а работать будет по установленному тут.
  */
 global.localStorage = new LocalStorageMock();
@@ -110,7 +110,7 @@ describe('App', () => {
 	 */
 	it('shows search account form when local storage is empty', async () => {
 		// монтирование компонента
-		const wrapper = shallow(<App />);
+		const wrapper = mount(<App />);
 
 		// ожидание "выполения" запросов и "перерисовки" компонента
 		await sleep(3000);
@@ -142,7 +142,7 @@ describe('App', () => {
 		);
 
 		// монтирование компонента и установка результатов поиска в состояние приложения
-		const wrapper = shallow(<App />);
+		const wrapper = mount(<App />);
 		wrapper.setState({searchResults: [{title: 'nameOne', value: '1'}]});
 
 		// ожидание "перерисовки" компонента и вывода результатов поиска
@@ -203,7 +203,7 @@ describe('App', () => {
 	 * Действия, выполняемые в конце каждого теста.
 	 */
 	afterEach(() => {
-		// восстановление fetchMock
+		// восстановление `fetchMock`
 		fetchMock.restore();
 
 		// очистка локального хранилища

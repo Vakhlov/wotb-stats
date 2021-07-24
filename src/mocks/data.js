@@ -87,6 +87,7 @@ const achievements = ['markOfMasteryI', 'markOfMasteryII', 'markOfMasteryIII'];
  */
 const noAchievementsResponse = {
 	data: {
+		// $FlowFixMe: в ответе сервера свойсвто имеет тип `number`
 		1: null
 	},
 	meta: {
@@ -100,6 +101,7 @@ const noAchievementsResponse = {
  */
 const noVehicleStatsResponse = {
 	data: {
+		// $FlowFixMe: в ответе сервера свойсвто имеет тип `number`
 		1: null
 	},
 	meta: {

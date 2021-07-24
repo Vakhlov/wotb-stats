@@ -48,7 +48,7 @@ const filterAchievementDescriptionsData = (data: Object): Object => {
  *     "nickname": string
  *   }
  * ]
- * @returns {Array<Object>} - возвращает результаты поиска без данных, уже использующихся в прилжении.
+ * @returns {Array<Object>} - возвращает результаты поиска без данных, уже использующихся в приложении.
  */
 const filterSearchResults = (data: Array<Object>): Array<Object> => {
 	const accounts = JSON.parse(localStorage.getItem('accounts') || '[]') || [];

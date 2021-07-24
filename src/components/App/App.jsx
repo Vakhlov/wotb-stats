@@ -1,6 +1,6 @@
 // @flow
 /** @jsx h */
-import {accountIdIsPermanent, logError} from 'helpers/common';
+import {accountIdIsPermanent, countPermanentAccounts, logError} from 'helpers/common';
 import type {
 	Account,
 	AchievementDescriptions,
@@ -9,9 +9,9 @@ import type {
 	VehicleInfo,
 	VehicleStats
 } from 'types';
-import {achievementFields, removedVehicles, tempIdPattern, tempNamePattern} from 'constants/app';
+import {achievementFields, removedVehicles, searchResultsLimit, tempIdPattern, tempNamePattern} from 'constants/app';
 import cn from 'classnames';
-import {Component, createRef, h} from 'preact';
+import {Component, h} from 'preact';
 import {
 	fetchAchievements,
 	fetchAchievementDescriptions,
@@ -21,16 +21,22 @@ import {
 } from 'helpers/fetch-data';
 import type {Props, State} from './types';
 import Record from 'components/Record';
+import SearchForm from 'components/SearchForm';
 import styles from './App.less';
 import Tab from 'components/Tabs/Tab';
 import Tabs from 'components/Tabs';
 
+/**
+ * Основной компонент приложения, выводит все остальные.
+ */
 export class App extends Component<Props, State> {
-	search = createRef();
-
 	// переменная, в которой хранится таймаут поиска
 	searchTimeout: any = null;
 
+	/**
+	 * Конструктор класса. Создает начальное состояние из переданных свойств и на основе информации из
+	 * локального хранилища.
+	 */
 	constructor (props: Props) {
 		super(props);
 
@@ -41,8 +47,8 @@ export class App extends Component<Props, State> {
 			accounts,
 			achievements: [],
 			achievementDescriptions: {},
-			loading: true,
 			currentAccount: localStorage.getItem('selectedAccountId') || selectedAccountId,
+			loading: true,
 			searchResults: [],
 			sortField: 'hitsPercentage',
 			vehicleInfo: {},
@@ -95,7 +101,7 @@ export class App extends Component<Props, State> {
 	setAchievements = (achievements: Array<VehicleAchievements>): void => {
 		const {vehicleStats} = this.state;
 
-		// Хрупкая логика здесь и в `setVehicleStats`: загрузка завершена когда есть и статистика, и достижения.
+		// хрупкая логика здесь и в `setVehicleStats`: загрузка завершена когда есть и статистика, и достижения.
 		this.setState({
 			achievements,
 			loading: vehicleStats.length === 0 && achievements.length > 0
@@ -117,7 +123,7 @@ export class App extends Component<Props, State> {
 	setVehicleStats = (vehicleStats: Array<VehicleStats>): void => {
 		const {achievements} = this.state;
 
-		// Хрупкая логика здесь и в `setAchievements`: загрузка завершена когда есть и статистика, и достижения.
+		// хрупкая логика здесь и в `setAchievements`: загрузка завершена когда есть и статистика, и достижения.
 		this.setState({
 			vehicleStats,
 			loading: achievements.length === 0 && vehicleStats.length > 0
@@ -125,16 +131,6 @@ export class App extends Component<Props, State> {
 	};
 
 	// Вспомогательные функции
-	/**
-	 * Запускает поиск.
-	 * @param {string} value - поисковый запрос.
-	 */
-	delayedSearch = (value: string) => () => {
-		search(value)
-			.then(this.setSearchResults)
-			.catch(logError);
-	};
-
 	/**
 	 * Возвращает `true`, если данные получены. Иначе - `false`.
 	 */
@@ -144,7 +140,20 @@ export class App extends Component<Props, State> {
 	}
 
 	/**
+	 * Запускает поиск.
+	 * @param {string} value - поисковый запрос.
+	 */
+	delayedSearch = (value: string) => () => {
+		const {accounts} = this.state;
+
+		search(value, searchResultsLimit + countPermanentAccounts(accounts))
+			.then(this.setSearchResults)
+			.catch(logError);
+	};
+
+	/**
 	 * Получает идентификаторы достижений по идентификатору техники.
+	 * @param {number} vehicleId - идентификатор техники.
 	 * @returns {Array<string>} - возвращает массив идентификаторов достижений.
 	 *
 	 * При использовании общего состояния приложения можно было бы подключить нужный компонент к нему, а не передавать
@@ -162,6 +171,8 @@ export class App extends Component<Props, State> {
 	 * объект с информацией об удаленной технике (информация об удаленной технике получена опытным путем и не
 	 * загружается постредством `API`). Если название не найдено и в объекте с информацией об удаленной технике,
 	 * возвращается идентификатор.
+	 * @param {number} vehicleId - идентификатор техники.
+	 * @returns {string} - возвращает название техники.
 	 */
 	getVehicleName (vehicleId: number): string {
 		const {vehicleInfo} = this.state;
@@ -178,6 +189,8 @@ export class App extends Component<Props, State> {
 
 	/**
 	 * Возвращает адрес миниатюры техники по ее идентификатору или пустую строку, если миниатюры нет.
+	 * @param {number} vehicleId - идентификатор техники.
+	 * @returns {string} - возвращает адрес миниатюры.
 	 */
 	getVehiclePreview (vehicleId: number): string {
 		const {vehicleInfo} = this.state;
@@ -185,19 +198,10 @@ export class App extends Component<Props, State> {
 	}
 
 	/**
-	 * Устанавливает фокус в поле поиска спустя треть секунды после его вывода.
-	 * Использование атрибута `autoFocus` у поля ввода не всегда возможно (в консоль браузера выводится
-	 * сообщение `Autofocus processing was blocked because a document already has a focused element`).
-	 */
-	setFocusToSearchInput () {
-		setTimeout(() => {
-			this.search.current && this.search.current.focus();
-		}, 300);
-	}
-
-	/**
 	 * Сортирует массив объектов со статистикой по технике по выбранному ключу. Пока ключ не выбирается динамически
 	 * и всегда соответствует статистике попаданий (`hitsPercentage`).
+	 * @param {Array<VehicleStats>} data - данные для сортировки.
+	 * @returns {Array<VehicleStats>} - возвращает отсортированные данные.
 	 */
 	sort (data: Array<VehicleStats>): Array<VehicleStats> {
 		const {sortField} = this.state;
@@ -216,7 +220,7 @@ export class App extends Component<Props, State> {
 	 */
 	handleAccountAdd = () => {
 		try {
-			const accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
+			const {accounts} = this.state;
 
 			// временные идентификаторы
 			const tempIds = accounts.map(account => account.id).filter(id => accountIdIsPermanent(id) === false);
@@ -242,7 +246,7 @@ export class App extends Component<Props, State> {
 			// сохранение в хранилище
 			localStorage.setItem('accounts', JSON.stringify(newAccounts));
 
-			// обновление состояни и переключение на созданную вкладку
+			// обновление состояния и переключение на созданную вкладку
 			this.setState(
 				{accounts: newAccounts},
 				() => this.handleAccountChange(newAccounts.length - 1)
@@ -292,12 +296,13 @@ export class App extends Component<Props, State> {
 	 * Обработчик выбора результата поиска. При выборе редактируется текущая вкладка.
 	 * @param {Option} accountInfo - выбранный результат поиска.
 	 */
-	handleAccountEdit = (accountInfo: Option) => () => {
+	handleAccountEdit = (accountInfo: Option) => {
 		const {currentAccount} = this.state;
 		const {title, value} = accountInfo;
 
 		// поиск индекса учетной записи для изменения
-		const accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
+		const {accounts} = this.state;
+
 		let accountToEdit;
 
 		if (accounts.length) {
@@ -366,12 +371,11 @@ export class App extends Component<Props, State> {
 	/**
 	 * Обработчик изменения значения в поле поиска. Использует таймаут, чтобы не делать лишние запросы на сервер
 	 * пока пользователь вводит поисковый запрос.
+	 * @param {string} value - текст, введенный пользователем в поле поиска.
 	 */
-	handleSearchChange = () => {
+	handleSearchChange = (value: string) => {
 		// очистка таймаута запуска поиска
 		clearTimeout(this.searchTimeout);
-
-		const value = this.search.current.value;
 
 		if (value.length > 2) {
 			// поиск начинается только при достаточной длине запроса
@@ -403,40 +407,12 @@ export class App extends Component<Props, State> {
 	renderAddAccountForm () {
 		const {searchResults} = this.state;
 
-		// вывод результатов поиска
-		const results = searchResults.map((item: Option) => {
-			return (
-				<button
-					className={styles.searchResultsItem}
-					key={item.value}
-					onClick={this.handleAccountEdit(item)}
-					type="button"
-				>
-					{item.title}
-				</button>
-			);
-		});
-
-		this.setFocusToSearchInput();
-
-		// вывод формы с результатами поиска
 		return (
-			<form className={styles.addAccountForm} onSubmit={event => event.preventDefault()}>
-				<div className={styles.addAccountFormField}>
-					<label htmlFor="accountId">Имя пользователя</label>
-					<input
-						autoComplete="off"
-						id="accountId"
-						name="accountId"
-						onKeyUp={this.handleSearchChange}
-						ref={this.search}
-						type="text"
-					/>
-					<div className={styles.searchResults}>
-						{results}
-					</div>
-				</div>
-			</form>
+			<SearchForm
+				onChange={this.handleSearchChange}
+				onResultItemClick={this.handleAccountEdit}
+				searchResults={searchResults}
+			/>
 		);
 	}
 
@@ -474,6 +450,9 @@ export class App extends Component<Props, State> {
 		}
 	}
 
+	/**
+	 * Выводит сообщение, если не удалось получить данные для учетной записи.
+	 */
 	renderNoDataMessage () {
 		const {loading} = this.state;
 
@@ -489,7 +468,9 @@ export class App extends Component<Props, State> {
 	}
 
 	/**
-	 * Выводит отдельную запись о технике.
+	 * Возвращает функцию вывода отдельной записи о технике.
+	 * @param {AchievementDescriptions} achievementDescriptions - описания достижений.
+	 * @returns {Function} - возвращает функцию вывода отдельной записи.
 	 */
 	renderRecord = (achievementDescriptions: AchievementDescriptions) => (item: VehicleStats) => {
 		const {hitsPercentageString, id} = item;
@@ -509,6 +490,9 @@ export class App extends Component<Props, State> {
 		);
 	};
 
+	/**
+	 * Выводит форму поиска и добавления учетной записи, если еще ни одна учетная запись не была добавлена.
+	 */
 	renderStartForm () {
 		const {accounts} = this.state;
 
@@ -519,6 +503,7 @@ export class App extends Component<Props, State> {
 
 	/**
 	 * Выводит содержимое вкладки.
+	 * @param {string} accountId - идентификатор учетной записи.
 	 */
 	renderTabContent (accountId: string) {
 		const {currentAccount, loading, vehicleStats} = this.state;
@@ -589,6 +574,9 @@ export class App extends Component<Props, State> {
 		return <span className={styles.control}><button onClick={this.handleUpdate}>Обновить</button></span>;
 	}
 
+	/**
+	 * Выводит весь интерфейс приложения.
+	 */
 	render () {
 		if (this.dataLoaded()) {
 			return (

@@ -10,92 +10,100 @@ import {LocalStorageMock} from 'mocks/local-storage';
 import {searchResultsLimit} from 'constants/app';
 
 describe('Filter functions', () => {
-	/**
-	 * Проверяет, `filterAchievementDescriptionsData` удаляет лишние описания достижений из ответа сервера.
-	 */
-	it('removes unnecessary properties from achievement descriptions', () => {
-		const desiredObject = {
-			mainGun: {},
-			markOfMastery: {},
-			markOfMasteryI: {},
-			markOfMasteryII: {},
-			markOfMasteryIII: {},
-			sniper: {},
-			titleSniper: {},
-			warrior: {}
-		};
+	describe('filterAchievementDescriptionsData', () => {
+		/**
+		 * Проверяет, что функция`filterAchievementDescriptionsData` удаляет лишние описания достижений из ответа сервера.
+		 */
+		it('removes unnecessary properties from achievement descriptions', () => {
+			const expectedResult = {
+				mainGun: {},
+				markOfMastery: {},
+				markOfMasteryI: {},
+				markOfMasteryII: {},
+				markOfMasteryIII: {},
+				sniper: {},
+				titleSniper: {},
+				warrior: {}
+			};
 
-		const filteredData = filterAchievementDescriptionsData(achievementDescriptionsResponse.data);
+			const filteredData = filterAchievementDescriptionsData(achievementDescriptionsResponse.data);
 
-		expect(filteredData).toMatchObject(desiredObject);
+			expect(filteredData).toMatchObject(expectedResult);
+		});
 	});
 
-	/**
-	 * Проверят, что функция `filterSearchResults` удаляет уже используемые в приложении данные из результатов поиска.
-	 */
-	it('removes data already in usage from search results', () => {
-		global.localStorage = new LocalStorageMock();
+	describe('filterSearchResults', () => {
+		/**
+		 * Проверят, что функция `filterSearchResults` удаляет уже используемые в приложении данные из результатов поиска.
+		 */
+		it('removes data already in usage from search results', () => {
+			global.localStorage = new LocalStorageMock();
 
-		const alreadyInUse = {account_id: 1, nickname: 'nickname1'};
-		const accounts = [{id: '1', name: 'nickname1'}];
+			const alreadyInUse = {account_id: 1, nickname: 'nickname1'};
+			const accounts = [{id: '1', name: 'nickname1'}];
 
-		localStorage.setItem('accounts', JSON.stringify(accounts));
+			localStorage.setItem('accounts', JSON.stringify(accounts));
 
-		const arr = [
-			alreadyInUse,
-			{account_id: 2, nickname: 'nickname2'},
-			{account_id: 3, nickname: 'nickname3'}
-		];
+			const arr = [
+				alreadyInUse,
+				{account_id: 2, nickname: 'nickname2'},
+				{account_id: 3, nickname: 'nickname3'}
+			];
 
-		const result = filterSearchResults(arr);
+			const result = filterSearchResults(arr);
 
-		expect(result.findIndex(item => item === alreadyInUse)).toBe(-1);
+			expect(result.findIndex(item => item === alreadyInUse)).toBe(-1);
+		});
 	});
 
-	/**
-	 * Проверяет, что функция `filterVehicleAchievements` удаляет информацию о лишних достижениях на технике из
-	 * ответа сервера.
-	 */
-	it('removes unnecessary achievements from vehicle info', () => {
-		const desiredObject1 = {
-			achievements: {
-				markOfMastery: 4,
-				titleSniper: 1,
-				warrior: 2
-			},
-			tank_id: 1
-		};
+	describe('filterVehicleAchievements', () => {
+		/**
+		 * Проверяет, что функция `filterVehicleAchievements` удаляет информацию о лишних достижениях на технике из
+		 * ответа сервера.
+		 */
+		it('removes unnecessary achievements from vehicle info', () => {
+			const expectedObject1 = {
+				achievements: {
+					markOfMastery: 4,
+					titleSniper: 1,
+					warrior: 2
+				},
+				tank_id: 1
+			};
 
-		const desiredObject2 = {
-			achievements: {
-				markOfMastery: 2,
-				titleSniper: 1
-			},
-			tank_id: 2561
-		};
+			const expectedObject2 = {
+				achievements: {
+					markOfMastery: 2,
+					titleSniper: 1
+				},
+				tank_id: 2561
+			};
 
-		const fitleredData = filterVehicleAchievements(vehicleAchievementsResponse.data[1]);
+			const filteredData = filterVehicleAchievements(vehicleAchievementsResponse.data[1]);
 
-		expect(fitleredData).toMatchObject([desiredObject1, desiredObject2]);
+			expect(filteredData).toMatchObject([expectedObject1, expectedObject2]);
+		});
 	});
 
-	/**
-	 * Проверяет, что функция `limitSearchResults` правильно ограничивает количество результатов поиска.
-	 */
-	it('limits search result count correctly', () => {
-		const arr1 = [];
-		const arr2 = [];
+	describe('limitSearchResults', () => {
+		/**
+		 * Проверяет, что функция `limitSearchResults` правильно ограничивает количество результатов поиска.
+		 */
+		it('limits search result count correctly', () => {
+			const arr1 = [];
+			const arr2 = [];
 
-		for (let i = 0; i < searchResultsLimit; i++) {
-			if (i < 3) {
-				arr1.push({account_id: i, nickname: `nickname${i}`});
+			for (let i = 0; i < searchResultsLimit; i++) {
+				if (i < 3) {
+					arr1.push({account_id: i, nickname: `nickname${i}`});
+				}
+
+				arr2.push({account_id: i, nickname: `nickname${i}`});
 			}
 
-			arr2.push({account_id: i, nickname: `nickname${i}`});
-		}
-
-		expect(limitSearchResults(arr1).length).toBe(arr1.length);
-		expect(limitSearchResults(arr2).length).toBe(searchResultsLimit);
+			expect(limitSearchResults(arr1).length).toBe(arr1.length);
+			expect(limitSearchResults(arr2).length).toBe(searchResultsLimit);
+		});
 	});
 
 	/**

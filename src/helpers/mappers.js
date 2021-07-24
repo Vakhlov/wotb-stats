@@ -25,18 +25,23 @@ const toAchievementDescriptions = (data: Object): AchievementDescriptions => {
  * Возвращает пустой массив, если значение аргумента не является массивом. Нужна для обработки ситуации, когда
  * в ответе сервера вместо ожидаемого массива был получен `null`.
  * @param {?Array<Object>} data - данные, полученные с сервера.
- * @retruns {Array<Object>} - возвращает пустой массив, если значение аргумента не является массивом.
+ * @returns {Array<Object>} - возвращает пустой массив, если значение аргумента не является массивом или
+ * исходное значение аргумента.
  */
 const toArray = (data: ?Array<Object>): Array<Object> => Array.isArray(data) ? data : [];
 
 /**
- * Преобразует результаты поиска, полученные с сервера, к объектам типа `Option`, которые используются в приложении.
- * @param {Array<Object>} data - результаты поиска, полученные с сервера.
- * @retruns {Array<Option>} - возвращает массив объектов типа `Option`.
+ * Преобразует результаты поиска, полученные с сервера, к объектам типа `Option`, который используется в приложении.
+ * @param {string} titleProp - название свойства, значение которого используется как видимый текст в `Option`.
+ * @param {string} valueProp - название свойства, значение которого используется как значение в `Option`.
+ * @returns {Function} - возвращает функцию преобразования к массиву объектов типа `Option`.
  */
-const toSearchOptions = (data: Array<Object>): Array<Option> => data.map(item => ({
-	title: item.nickname,
-	value: item.account_id.toString()
+const toOptions = (
+	titleProp: string,
+	valueProp: string
+) => (data: Array<Object>): Array<Option> => data.map(item => ({
+	title: item[titleProp].toString(),
+	value: item[valueProp].toString()
 }));
 
 /**
@@ -72,7 +77,7 @@ const toVehicleInfo = (data: Object): VehicleInfo => {
 
 /**
  * Преобразует массив объектов со статистикой по технике, полученных с сервера, к массиву объектов типа `VehicleStats`,
- * которые используются в приложении. Расчитывает процент попадания.
+ * который используется в приложении. Расчитывает процент попадания.
  * @param {Array<Object>} data - массив объектов со статистикой по технике, полученный с сервера.
  * @returns {Array<VehicleStats>} - возвращает массив объектов типа `VehicleStats`.
  */
@@ -88,7 +93,7 @@ const toVehiclesStats = (data: Array<Object>): Array<VehicleStats> => data.map((
 export {
 	toAchievementDescriptions,
 	toArray,
-	toSearchOptions,
+	toOptions,
 	toVehicleAchievements,
 	toVehicleInfo,
 	toVehiclesStats
