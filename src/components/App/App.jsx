@@ -1,6 +1,6 @@
 // @flow
 /** @jsx h */
-import {accountIdIsPermanent, logError} from 'helpers/common';
+import {accountIdIsPermanent, countPermanentAccounts, logError} from 'helpers/common';
 import type {
 	Account,
 	AchievementDescriptions,
@@ -9,7 +9,7 @@ import type {
 	VehicleInfo,
 	VehicleStats
 } from 'types';
-import {achievementFields, removedVehicles, tempIdPattern, tempNamePattern} from 'constants/app';
+import {achievementFields, removedVehicles, searchResultsLimit, tempIdPattern, tempNamePattern} from 'constants/app';
 import cn from 'classnames';
 import {Component, createRef, h} from 'preact';
 import {
@@ -130,7 +130,9 @@ export class App extends Component<Props, State> {
 	 * @param {string} value - поисковый запрос.
 	 */
 	delayedSearch = (value: string) => () => {
-		search(value)
+		const {accounts} = this.state;
+
+		search(value, searchResultsLimit + countPermanentAccounts(accounts))
 			.then(this.setSearchResults)
 			.catch(logError);
 	};
@@ -216,7 +218,7 @@ export class App extends Component<Props, State> {
 	 */
 	handleAccountAdd = () => {
 		try {
-			const accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
+			const {accounts} = this.state;
 
 			// временные идентификаторы
 			const tempIds = accounts.map(account => account.id).filter(id => accountIdIsPermanent(id) === false);
@@ -297,7 +299,8 @@ export class App extends Component<Props, State> {
 		const {title, value} = accountInfo;
 
 		// поиск индекса учетной записи для изменения
-		const accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
+		const {accounts} = this.state;
+
 		let accountToEdit;
 
 		if (accounts.length) {

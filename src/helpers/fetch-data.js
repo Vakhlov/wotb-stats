@@ -11,7 +11,6 @@ import type {
 	VehicleStats
 } from 'types';
 import {api, appId, defaultRequestOptions, paths, requiredParams, searchResultsLimit, server} from 'constants/app';
-import {countPermanentAccounts} from 'helpers/common';
 import {
 	filterAchievementDescriptionsData,
 	filterVehicleAchievements,
@@ -167,7 +166,7 @@ const fetchVehicleStatsByAccountId = (id: string): Promise<Array<VehicleStats>> 
  */
 const getUrl = (partialUrl: string, options: RequestOptions = defaultRequestOptions): string => {
 	// Настройки запроса.
-	const {id, search} = options;
+	const {id, limit = searchResultsLimit, search} = options;
 
 	// Список полей ответа
 	const fields = [];
@@ -178,7 +177,7 @@ const getUrl = (partialUrl: string, options: RequestOptions = defaultRequestOpti
 	// По блоку методов и методу определяем список полей ответа и `GET`-параметры запроса
 	switch (partialUrl) {
 		case paths.accountList:
-			params.push(`limit=${searchResultsLimit + countPermanentAccounts()}`);
+			params.push(`limit=${limit}`);
 			params.push(`search=${search}`);
 			break;
 		case paths.encyclopediaAchievements:
@@ -224,10 +223,12 @@ const normalizeOptions = (options: CommonMap): RequestOptions => ({
 /**
  * Ищет учетные записи по названию.
  * @param {string} search - поисковая фраза.
+ * @param {number} limit - ограничение количества результатов поиска.
  * @returns {Promise<Array<Option>>} - возвращает обещание результатов поиска.
  */
-const search = (search: string): Promise<Array<Option>> => {
-	return fetchData(paths.accountList, {search})					// выполняем запрос,
+const search = (search: string, limit: number = searchResultsLimit): Promise<Array<Option>> => {
+	const options = {limit: `${limit}`, search};
+	return fetchData(paths.accountList, options)					// выполняем запрос,
 		.then(checkResponseStatus)													// проверяем статус ответа,
 		.then(response => response.data)										// получаем основные данные,
 		.then(filterSearchResults)													// исключаем уже существующие учетные записи,

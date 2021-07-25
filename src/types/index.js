@@ -53,6 +53,7 @@ export type Option = {
 
 export type RequestOptions = {
 	id: string,
+	limit?: number,
 	search: string,
 };
 
