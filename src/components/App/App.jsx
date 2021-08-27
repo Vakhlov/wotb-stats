@@ -282,7 +282,7 @@ export class App extends Component<Props, State> {
 	 * Обработчик выбора результата поиска. При выборе редактируется текущая вкладка.
 	 * @param {Option} accountInfo - выбранный результат поиска.
 	 */
-	handleAccountEdit = (accountInfo: Option) => () => {
+	handleAccountEdit = (accountInfo: Option) => {
 		const {currentAccount} = this.state;
 		const {title, value} = accountInfo;
 

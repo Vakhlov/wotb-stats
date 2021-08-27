@@ -13,9 +13,9 @@ import fetchMock from 'fetch-mock';
 import {getUrl, normalizeOptions} from 'helpers/fetch-data';
 import {h} from 'preact';
 import {LocalStorageMock} from 'mocks/local-storage';
+import {mount, shallow} from 'enzyme';
 import {paths} from 'constants/app';
 import Record from 'components/Record';
-import {shallow} from 'enzyme';
 import Tab from 'components/Tabs/Tab';
 import Tabs from 'components/Tabs';
 
@@ -110,7 +110,7 @@ describe('App', () => {
 	 */
 	it('shows search account form when local storage is empty', async () => {
 		// монтирование компонента
-		const wrapper = shallow(<App />);
+		const wrapper = mount(<App />);
 
 		// ожидание "выполения" запросов и "перерисовки" компонента
 		await sleep(3000);
@@ -142,7 +142,7 @@ describe('App', () => {
 		);
 
 		// монтирование компонента и установка результатов поиска в состояние приложения
-		const wrapper = shallow(<App />);
+		const wrapper = mount(<App />);
 		wrapper.setState({searchResults: [{title: 'nameOne', value: '1'}]});
 
 		// ожидание "перерисовки" компонента и вывода результатов поиска
