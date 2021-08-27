@@ -31,12 +31,16 @@ const toArray = (data: ?Array<Object>): Array<Object> => Array.isArray(data) ? d
 
 /**
  * Преобразует результаты поиска, полученные с сервера, к объектам типа `Option`, которые используются в приложении.
- * @param {Array<Object>} data - результаты поиска, полученные с сервера.
- * @retruns {Array<Option>} - возвращает массив объектов типа `Option`.
+ * @param {string} titleProp - название свойства, значение которого используется как видимый текст в `Option`.
+ * @param {string} valueProp - название свойства, значение которого используется как значение в `Option`.
+ * @retruns {Function} - возвращает функцию преобразования к массиву объектов типа `Option`.
  */
-const toSearchOptions = (data: Array<Object>): Array<Option> => data.map(item => ({
-	title: item.nickname,
-	value: item.account_id.toString()
+const toOptions = (
+	titleProp: string,
+	valueProp: string
+) => (data: Array<Object>): Array<Option> => data.map(item => ({
+	title: item[titleProp].toString(),
+	value: item[valueProp].toString()
 }));
 
 /**
@@ -88,7 +92,7 @@ const toVehiclesStats = (data: Array<Object>): Array<VehicleStats> => data.map((
 export {
 	toAchievementDescriptions,
 	toArray,
-	toSearchOptions,
+	toOptions,
 	toVehicleAchievements,
 	toVehicleInfo,
 	toVehiclesStats

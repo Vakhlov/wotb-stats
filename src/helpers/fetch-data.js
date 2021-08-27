@@ -20,7 +20,7 @@ import {
 import {
 	toAchievementDescriptions,
 	toArray,
-	toSearchOptions,
+	toOptions,
 	toVehicleAchievements,
 	toVehicleInfo,
 	toVehiclesStats
@@ -228,6 +228,8 @@ const normalizeOptions = (options: CommonMap): RequestOptions => ({
  */
 const search = (search: string, limit: number = searchResultsLimit): Promise<Array<Option>> => {
 	const options = {limit: `${limit}`, search};
+	const toSearchOptions = toOptions('nickname', 'account_id');
+
 	return fetchData(paths.accountList, options)					// выполняем запрос,
 		.then(checkResponseStatus)													// проверяем статус ответа,
 		.then(response => response.data)										// получаем основные данные,

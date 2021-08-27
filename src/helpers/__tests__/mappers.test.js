@@ -8,7 +8,7 @@ import {
 import {
 	toAchievementDescriptions,
 	toArray,
-	toSearchOptions,
+	toOptions,
 	toVehicleAchievements,
 	toVehicleInfo,
 	toVehiclesStats
@@ -58,7 +58,7 @@ describe('Mappers', () => {
 	});
 
 	/**
-	 * Проверяет, что функция `toSearchOptions` преобразует результаты поиска к формату, используемому в приложении.
+	 * Проверяет, что функция `toOptions` преобразует результаты поиска к формату, используемому в приложении.
 	 */
 	it(
 		'maps "account_id" to "value" and "nickname" to "title" properties in search results and changes value type of "value" property from number to string',
@@ -73,7 +73,7 @@ describe('Mappers', () => {
 				value: '1'
 			}];
 
-			const mappedData = toSearchOptions(data);
+			const mappedData = toOptions('nickname', 'account_id')(data);
 
 			expect(mappedData[0]).toMatchObject(desiredData[0]);
 		}
