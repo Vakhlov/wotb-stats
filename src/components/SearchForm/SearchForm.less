@@ -1,0 +1,63 @@
+:local {
+	.addAccountForm {
+		font-family: Arial, Helvetica, sans-serif;
+		margin: 0 auto;
+		max-width: 600px;
+		padding: 20px 0;
+	}
+
+	.addAccountFormField {
+		padding-bottom: 20px;
+
+		label {
+			display: block;
+			font-size: 13px;
+			line-height: 20px;
+		}
+
+		input {
+			border: 1px solid #999;
+			box-sizing: border-box;
+			font-size: 14px;
+			height: 32px;
+			line-height: 32px;
+			padding: 0 8px;
+			width: 100%;
+
+			&:focus {
+				border-color: #000;
+				outline: none;
+			}
+		}
+	}
+
+	.searchResults {
+		border-color: #DDD;
+		border-style: solid;
+		border-width: 0 1px 1px 1px;
+		margin: 0 auto;
+		max-width: 600px;
+	}
+
+	.searchResultsItem {
+		border: none;
+		background: none;
+		font-size: 14px;
+		line-height: 32px;
+		margin: 0;
+		padding: 0 8px;
+		text-align: left;
+		white-space: nowrap;
+		width: 100%;
+
+		&:hover,
+		&:focus {
+			background: #EFEFEF;
+			outline: none;
+		}
+
+		&:active {
+			background: #DDD;
+		}
+	}
+}

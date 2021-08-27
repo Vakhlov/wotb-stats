@@ -11,7 +11,7 @@ import type {
 } from 'types';
 import {achievementFields, removedVehicles, searchResultsLimit, tempIdPattern, tempNamePattern} from 'constants/app';
 import cn from 'classnames';
-import {Component, createRef, h} from 'preact';
+import {Component, h} from 'preact';
 import {
 	fetchAchievements,
 	fetchAchievementDescriptions,
@@ -21,13 +21,12 @@ import {
 } from 'helpers/fetch-data';
 import type {Props, State} from './types';
 import Record from 'components/Record';
+import SearchForm from 'components/SearchForm';
 import styles from './App.less';
 import Tab from 'components/Tabs/Tab';
 import Tabs from 'components/Tabs';
 
 export class App extends Component<Props, State> {
-	search = createRef();
-
 	// переменная, в которой хранится таймаут поиска
 	searchTimeout: any = null;
 
@@ -41,8 +40,8 @@ export class App extends Component<Props, State> {
 			accounts,
 			achievements: [],
 			achievementDescriptions: {},
-			loading: true,
 			currentAccount: localStorage.getItem('selectedAccountId') || selectedAccountId,
+			loading: true,
 			searchResults: [],
 			sortField: 'hitsPercentage',
 			vehicleInfo: {},
@@ -126,6 +125,14 @@ export class App extends Component<Props, State> {
 
 	// Вспомогательные функции
 	/**
+	 * Возвращает `true`, если данные получены. Иначе - `false`.
+	 */
+	dataLoaded (): boolean {
+		const {achievementDescriptions, vehicleInfo} = this.state;
+		return Object.keys(achievementDescriptions).length > 0 && Object.keys(vehicleInfo).length > 0;
+	}
+
+	/**
 	 * Запускает поиск.
 	 * @param {string} value - поисковый запрос.
 	 */
@@ -136,14 +143,6 @@ export class App extends Component<Props, State> {
 			.then(this.setSearchResults)
 			.catch(logError);
 	};
-
-	/**
-	 * Возвращает `true`, если данные получены. Иначе - `false`.
-	 */
-	dataLoaded (): boolean {
-		const {achievementDescriptions, vehicleInfo} = this.state;
-		return Object.keys(achievementDescriptions).length > 0 && Object.keys(vehicleInfo).length > 0;
-	}
 
 	/**
 	 * Получает идентификаторы достижений по идентификатору техники.
@@ -184,17 +183,6 @@ export class App extends Component<Props, State> {
 	getVehiclePreview (vehicleId: number): string {
 		const {vehicleInfo} = this.state;
 		return vehicleInfo[vehicleId] ? vehicleInfo[vehicleId].preview : '';
-	}
-
-	/**
-	 * Устанавливает фокус в поле поиска спустя треть секунды после его вывода.
-	 * Использование атрибута `autoFocus` у поля ввода не всегда возможно (в консоль браузера выводится
-	 * сообщение `Autofocus processing was blocked because a document already has a focused element`).
-	 */
-	setFocusToSearchInput () {
-		setTimeout(() => {
-			this.search.current && this.search.current.focus();
-		}, 300);
 	}
 
 	/**
@@ -370,11 +358,9 @@ export class App extends Component<Props, State> {
 	 * Обработчик изменения значения в поле поиска. Использует таймаут, чтобы не делать лишние запросы на сервер
 	 * пока пользователь вводит поисковый запрос.
 	 */
-	handleSearchChange = () => {
+	handleSearchChange = (value: string) => {
 		// очистка таймаута запуска поиска
 		clearTimeout(this.searchTimeout);
-
-		const value = this.search.current.value;
 
 		if (value.length > 2) {
 			// поиск начинается только при достаточной длине запроса
@@ -406,40 +392,12 @@ export class App extends Component<Props, State> {
 	renderAddAccountForm () {
 		const {searchResults} = this.state;
 
-		// вывод результатов поиска
-		const results = searchResults.map((item: Option) => {
-			return (
-				<button
-					className={styles.searchResultsItem}
-					key={item.value}
-					onClick={this.handleAccountEdit(item)}
-					type="button"
-				>
-					{item.title}
-				</button>
-			);
-		});
-
-		this.setFocusToSearchInput();
-
-		// вывод формы с результатами поиска
 		return (
-			<form className={styles.addAccountForm} onSubmit={event => event.preventDefault()}>
-				<div className={styles.addAccountFormField}>
-					<label htmlFor="accountId">Имя пользователя</label>
-					<input
-						autoComplete="off"
-						id="accountId"
-						name="accountId"
-						onKeyUp={this.handleSearchChange}
-						ref={this.search}
-						type="text"
-					/>
-					<div className={styles.searchResults}>
-						{results}
-					</div>
-				</div>
-			</form>
+			<SearchForm
+				onChange={this.handleSearchChange}
+				onResultItemClick={this.handleAccountEdit}
+				searchResults={searchResults}
+			/>
 		);
 	}
 
