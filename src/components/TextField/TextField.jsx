@@ -3,6 +3,9 @@
 import {Component, createRef, h} from 'preact';
 import type {Props} from './types';
 
+/**
+ * Выводит поле ввода и текстовую метку к нему.
+ */
 export class TextField extends Component<Props> {
 	static defaultProps = {
 		className: ''
@@ -10,12 +13,15 @@ export class TextField extends Component<Props> {
 
 	input = createRef();
 
+	/**
+	 * Обработчик пользовательского ввода.
+	 */
 	handleKeyUp = () => {
 		const {onChange} = this.props;
 		const value = this.input.current.value;
 
 		onChange(value);
-	}
+	};
 
 	/**
 	 * Устанавливает фокус в поле поиска спустя треть секунды после его вывода.
@@ -28,6 +34,9 @@ export class TextField extends Component<Props> {
 		}, 300);
 	}
 
+	/**
+	 * Выводит поле ввода.
+	 */
 	renderInput () {
 		const {autofocus, id} = this.props;
 
@@ -45,11 +54,17 @@ export class TextField extends Component<Props> {
 		);
 	}
 
+	/**
+	 * Выводит текстовую метку к полю ввода.
+	 */
 	renderLabel () {
 		const {id, label} = this.props;
 		return <label htmlFor={id}>{label}</label>;
 	}
 
+	/**
+	 * Выводит поле ввода и тесктовую метку к нему.
+	 */
 	render () {
 		const {className} = this.props;
 		const props = {

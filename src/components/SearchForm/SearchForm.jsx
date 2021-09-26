@@ -6,15 +6,24 @@ import type {Props} from './types';
 import styles from './SearchForm.less';
 import TextField from 'components/TextField';
 
+/**
+ * Выводит форму поиска и добавления учетной записи и результаты поиска.
+ */
 export class SearchForm extends Component<Props> {
 	// переменная, в которой хранится таймаут поиска
 	searchTimeout: any = null;
 
+	/**
+	 * Обработчик щелчка по результату поиска.
+	 */
 	handleResultItemClick = (item: Option) => () => {
 		const {onResultItemClick} = this.props;
 		onResultItemClick(item);
 	};
 
+	/**
+	 * Выводит форму поиска.
+	 */
 	renderForm () {
 		const {onChange} = this.props;
 
@@ -31,6 +40,9 @@ export class SearchForm extends Component<Props> {
 		);
 	}
 
+	/**
+	 * Выводит отдельный результат поиска.
+	 */
 	renderResultItem = (item: Option) => {
 		return (
 			<button
@@ -44,6 +56,9 @@ export class SearchForm extends Component<Props> {
 		);
 	};
 
+	/**
+	 * Выводит результаты поиска.
+	 */
 	renderSearchResults () {
 		const {searchResults} = this.props;
 
@@ -58,6 +73,9 @@ export class SearchForm extends Component<Props> {
 		return null;
 	}
 
+	/**
+	 * Выводит форму и результаты.
+	 */
 	render () {
 		return (
 			<div>

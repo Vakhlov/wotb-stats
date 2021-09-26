@@ -7,7 +7,7 @@ describe('Common helpers', () => {
 		/**
 		 * Проверяет, что функция `accountIdIsPermanent` возвращает `false`, если идентификатор учетной записи временный.
 		 */
-		it('returns `false` if acount id is temporary', () => {
+		it('returns `false` if account id is temporary', () => {
 			const tempId = `${tempIdPattern}1`;
 			expect(accountIdIsPermanent(tempId)).toBe(false);
 		});

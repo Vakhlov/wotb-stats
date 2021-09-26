@@ -12,7 +12,7 @@ import {searchResultsLimit} from 'constants/app';
 describe('Filter functions', () => {
 	describe('filterAchievementDescriptionsData', () => {
 		/**
-		 * Проверяет, `filterAchievementDescriptionsData` удаляет лишние описания достижений из ответа сервера.
+		 * Проверяет, что функция`filterAchievementDescriptionsData` удаляет лишние описания достижений из ответа сервера.
 		 */
 		it('removes unnecessary properties from achievement descriptions', () => {
 			const expectedResult = {
@@ -79,9 +79,9 @@ describe('Filter functions', () => {
 				tank_id: 2561
 			};
 
-			const fitleredData = filterVehicleAchievements(vehicleAchievementsResponse.data[1]);
+			const filteredData = filterVehicleAchievements(vehicleAchievementsResponse.data[1]);
 
-			expect(fitleredData).toMatchObject([expectedObject1, expectedObject2]);
+			expect(filteredData).toMatchObject([expectedObject1, expectedObject2]);
 		});
 	});
 

@@ -26,10 +26,17 @@ import styles from './App.less';
 import Tab from 'components/Tabs/Tab';
 import Tabs from 'components/Tabs';
 
+/**
+ * Основной компонент приложения, выводит все остальные.
+ */
 export class App extends Component<Props, State> {
 	// переменная, в которой хранится таймаут поиска
 	searchTimeout: any = null;
 
+	/**
+	 * Конструктор класса. Создает начальное состояние из переданных свойств и на основе информации из
+	 * локального хранилища.
+	 */
 	constructor (props: Props) {
 		super(props);
 
@@ -94,7 +101,7 @@ export class App extends Component<Props, State> {
 	setAchievements = (achievements: Array<VehicleAchievements>): void => {
 		const {vehicleStats} = this.state;
 
-		// Хрупкая логика здесь и в `setVehicleStats`: загрузка завершена когда есть и статистика, и достижения.
+		// хрупкая логика здесь и в `setVehicleStats`: загрузка завершена когда есть и статистика, и достижения.
 		this.setState({
 			achievements,
 			loading: vehicleStats.length === 0 && achievements.length > 0
@@ -116,7 +123,7 @@ export class App extends Component<Props, State> {
 	setVehicleStats = (vehicleStats: Array<VehicleStats>): void => {
 		const {achievements} = this.state;
 
-		// Хрупкая логика здесь и в `setAchievements`: загрузка завершена когда есть и статистика, и достижения.
+		// хрупкая логика здесь и в `setAchievements`: загрузка завершена когда есть и статистика, и достижения.
 		this.setState({
 			vehicleStats,
 			loading: achievements.length === 0 && vehicleStats.length > 0
@@ -146,6 +153,7 @@ export class App extends Component<Props, State> {
 
 	/**
 	 * Получает идентификаторы достижений по идентификатору техники.
+	 * @param {number} vehicleId - идентификатор техники.
 	 * @returns {Array<string>} - возвращает массив идентификаторов достижений.
 	 *
 	 * При использовании общего состояния приложения можно было бы подключить нужный компонент к нему, а не передавать
@@ -163,6 +171,8 @@ export class App extends Component<Props, State> {
 	 * объект с информацией об удаленной технике (информация об удаленной технике получена опытным путем и не
 	 * загружается постредством `API`). Если название не найдено и в объекте с информацией об удаленной технике,
 	 * возвращается идентификатор.
+	 * @param {number} vehicleId - идентификатор техники.
+	 * @returns {string} - возвращает название техники.
 	 */
 	getVehicleName (vehicleId: number): string {
 		const {vehicleInfo} = this.state;
@@ -179,6 +189,8 @@ export class App extends Component<Props, State> {
 
 	/**
 	 * Возвращает адрес миниатюры техники по ее идентификатору или пустую строку, если миниатюры нет.
+	 * @param {number} vehicleId - идентификатор техники.
+	 * @returns {string} - возвращает адрес миниатюры.
 	 */
 	getVehiclePreview (vehicleId: number): string {
 		const {vehicleInfo} = this.state;
@@ -188,6 +200,8 @@ export class App extends Component<Props, State> {
 	/**
 	 * Сортирует массив объектов со статистикой по технике по выбранному ключу. Пока ключ не выбирается динамически
 	 * и всегда соответствует статистике попаданий (`hitsPercentage`).
+	 * @param {Array<VehicleStats>} data - данные для сортировки.
+	 * @returns {Array<VehicleStats>} - возвращает отсортированные данные.
 	 */
 	sort (data: Array<VehicleStats>): Array<VehicleStats> {
 		const {sortField} = this.state;
@@ -232,7 +246,7 @@ export class App extends Component<Props, State> {
 			// сохранение в хранилище
 			localStorage.setItem('accounts', JSON.stringify(newAccounts));
 
-			// обновление состояни и переключение на созданную вкладку
+			// обновление состояния и переключение на созданную вкладку
 			this.setState(
 				{accounts: newAccounts},
 				() => this.handleAccountChange(newAccounts.length - 1)
@@ -357,6 +371,7 @@ export class App extends Component<Props, State> {
 	/**
 	 * Обработчик изменения значения в поле поиска. Использует таймаут, чтобы не делать лишние запросы на сервер
 	 * пока пользователь вводит поисковый запрос.
+	 * @param {string} value - текст, введенный пользователем в поле поиска.
 	 */
 	handleSearchChange = (value: string) => {
 		// очистка таймаута запуска поиска
@@ -435,6 +450,9 @@ export class App extends Component<Props, State> {
 		}
 	}
 
+	/**
+	 * Выводит сообщение, если не удалось получить данные для учетной записи.
+	 */
 	renderNoDataMessage () {
 		const {loading} = this.state;
 
@@ -450,7 +468,9 @@ export class App extends Component<Props, State> {
 	}
 
 	/**
-	 * Выводит отдельную запись о технике.
+	 * Возвращает функцию вывода отдельной записи о технике.
+	 * @param {AchievementDescriptions} achievementDescriptions - описания достижений.
+	 * @returns {Function} - возвращает функцию вывода отдельной записи.
 	 */
 	renderRecord = (achievementDescriptions: AchievementDescriptions) => (item: VehicleStats) => {
 		const {hitsPercentageString, id} = item;
@@ -470,6 +490,9 @@ export class App extends Component<Props, State> {
 		);
 	};
 
+	/**
+	 * Выводит форму поиска и добавления учетной записи, если еще ни одна учетная запись не была добавлена.
+	 */
 	renderStartForm () {
 		const {accounts} = this.state;
 
@@ -480,6 +503,7 @@ export class App extends Component<Props, State> {
 
 	/**
 	 * Выводит содержимое вкладки.
+	 * @param {string} accountId - идентификатор учетной записи.
 	 */
 	renderTabContent (accountId: string) {
 		const {currentAccount, loading, vehicleStats} = this.state;
@@ -550,6 +574,9 @@ export class App extends Component<Props, State> {
 		return <span className={styles.control}><button onClick={this.handleUpdate}>Обновить</button></span>;
 	}
 
+	/**
+	 * Выводит весь интерфейс приложения.
+	 */
 	render () {
 		if (this.dataLoaded()) {
 			return (

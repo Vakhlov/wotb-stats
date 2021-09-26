@@ -13,7 +13,7 @@ const accountIdIsPermanent = (accountId: string): boolean => accountId.indexOf(t
 
 /**
  * Определяет количество постоянных вкладок.
- * @param {Array<Account>} - массив всех используемых в приложении учетных записей на текущий момент.
+ * @param {Array<Account>} accounts - массив всех используемых в приложении учетных записей на текущий момент.
  * @returns {number} - возвращает количество постоянных вкладок.
  */
 const countPermanentAccounts = (accounts: Array<Account>): number => {

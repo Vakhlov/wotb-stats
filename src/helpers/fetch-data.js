@@ -35,13 +35,13 @@ import {
  * `false` - если нет.
  */
 const checkOptions = (partialUrl: string, options: CommonMap): boolean => {
-	// Список обязательных параметров для указанного пути.
+	// список обязательных параметров для указанного пути
 	const params = requiredParams[partialUrl] || [];
 
-	// Список ключей в объекте настроек.
+	// список ключей в объекте настроек
 	const optionNames = Object.keys(options);
 
-	// Все обязательные параметры должны присутствовать в списке ключей объекта настроек.
+	// все обязательные параметры должны присутствовать в списке ключей объекта настроек
 	return params.every(param => optionNames.includes(param));
 };
 
@@ -115,19 +115,19 @@ const fetchAchievements = (id: string): Promise<Array<VehicleAchievements>> => {
  */
 const fetchData = (partialUrl: string, options: CommonMap = {}): Promise<any> => {
 	if (checkOptions(partialUrl, options)) {
-		// делаем запрос только если объект с `GET`-параметрами содержит все необходимые `GET`-параметры.
+		// делаем запрос только если объект с `GET`-параметрами содержит все необходимые `GET`-параметры
 
 		const normalizedOptions = normalizeOptions(options);// нормализуем объект настроек
 
 		return fetch(getUrl(partialUrl, normalizedOptions))	// выполняем запрос,
 			.then(response => response.json());								// получаем `JSON` из ответа.
 	} else {
-		// если объект с `GET`-параметрами содержит не все необходимые `GET`-параметры, выбрасываем исключение.
+		// если объект с `GET`-параметрами содержит не все необходимые `GET`-параметры, выбрасываем исключение
 
-		// список необходимых `GET`-параметров.
+		// список необходимых `GET`-параметров
 		const params = requiredParams[partialUrl] || [];
 
-		// выброс исключения с указанием списка необходимых параметров.
+		// выброс исключения с указанием списка необходимых параметров
 		throw new Error(`В настройках запроса указаны не все обязательные параметры: ${params.join(', ')}`);
 	}
 };
@@ -165,16 +165,16 @@ const fetchVehicleStatsByAccountId = (id: string): Promise<Array<VehicleStats>> 
  * @returns {string} - возвращает адрес запроса к `API`.
  */
 const getUrl = (partialUrl: string, options: RequestOptions = defaultRequestOptions): string => {
-	// Настройки запроса.
+	// настройки запроса
 	const {id, limit = searchResultsLimit, search} = options;
 
-	// Список полей ответа
+	// список полей ответа
 	const fields = [];
 
 	// `GET`-параметры: идентификаторы приложения, учетной записи и список полей ответа
 	const params = [`application_id=${appId}`];
 
-	// По блоку методов и методу определяем список полей ответа и `GET`-параметры запроса
+	// по блоку методов и методу определяем список полей ответа и `GET`-параметры запроса
 	switch (partialUrl) {
 		case paths.accountList:
 			params.push(`limit=${limit}`);
@@ -200,7 +200,7 @@ const getUrl = (partialUrl: string, options: RequestOptions = defaultRequestOpti
 		params.push(`fields=${fields.join(',')}`);
 	}
 
-	// Итоговый адрес запроса
+	// итоговый адрес запроса
 	return `${server}/${api}/${partialUrl}/?${params.join('&')}`;
 };
 

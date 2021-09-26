@@ -32,12 +32,18 @@ export class Achievements extends Component<Props> {
 		};
 
 		return <img key={id} {...props} />;
-	}
+	};
 
+	/**
+	 * Вызывает метод вывода отдельного достижения для каждого элемента списка и возвращает результат.
+	 */
 	renderItems (): Array<HTMLImageElement> {
 		return achievementFields.map<HTMLImageElement>(this.renderItem);
 	}
 
+	/**
+	 * Выводит список достижений.
+	 */
 	render (): HTMLDivElement {
 		return (
 			<div className={styles.achievements}>
