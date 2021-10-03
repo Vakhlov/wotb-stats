@@ -5,6 +5,31 @@
  */
 
 /**
+ * Пример ответа на запрос общей статистики учетной записи.
+ */
+const accountInfoResponse = {
+	data: {
+		// '1' в данном случае - идентификатор учетной записи
+		// $FlowFixMe
+		1: {
+			statistics: {
+				all: {
+					battles: 1,
+					damage_dealt: 1,
+					hits: 1,
+					wins: 1,
+					shots: 1
+				}
+			}
+		}
+	},
+	meta: {
+		count: 1
+	},
+	status: 'ok'
+};
+
+/**
  * Пример информации о достижениях после преобразования: изменено название ключа идентификатора и из названия
  * убран идентификатор достижения. Используется для тестирования функции обратного вызова для `Array.map`.
  */
@@ -114,16 +139,16 @@ const noVehicleStatsResponse = {
  * Пример ответа на поисковый запрос.
  */
 const searchResponse = {
-	status: 'ok',
-	meta: {
-		count: 1
-	},
 	data: [
 		{
 			nickname: 'meaning',
 			account_id: 42
 		}
-	]
+	],
+	meta: {
+		count: 1
+	},
+	status: 'ok'
 };
 
 /**
@@ -222,6 +247,7 @@ const vehicleStatsResponse = {
 };
 
 export {
+	accountInfoResponse,
 	achievementDescriptions,
 	achievementDescriptionsResponse,
 	achievements,

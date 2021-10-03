@@ -18,6 +18,7 @@ import {
 	limitSearchResults
 } from 'helpers/filters';
 import {
+	toAccountInfo,
 	toAchievementDescriptions,
 	toArray,
 	toOptions,
@@ -75,6 +76,18 @@ const checkResponseStatus = (response: APIResponse): APIResponseSuccess => {
 	}
 
 	throw new Error(JSON.stringify(response));
+};
+
+/**
+ * Получает общую статистику учетной записи.
+ * @param {string} id - номер учетной записи.
+ * @returns {Promise<AccountInfo>} - возвращает обещание общей статистики учетной записи.
+ */
+const fetchAccountInfo = (id: string) => {
+	return fetchData(paths.accountInfo, {id})							// выполняем запрос,
+		.then(checkResponseStatus)													// проверяем статус ответа,
+		.then(response => response.data[id])								// получаем основные данные,
+		.then(toAccountInfo);																// преобразуем их в нужный формат.
 };
 
 /**
@@ -176,6 +189,16 @@ const getUrl = (partialUrl: string, options: RequestOptions = defaultRequestOpti
 
 	// по блоку методов и методу определяем список полей ответа и `GET`-параметры запроса
 	switch (partialUrl) {
+		case paths.accountInfo:
+			fields.push(
+				'statistics.all.battles',
+				'statistics.all.damage_dealt',
+				'statistics.all.hits',
+				'statistics.all.shots',
+				'statistics.all.wins'
+			);
+			params.push(`account_id=${id}`);
+			break;
 		case paths.accountList:
 			params.push(`limit=${limit}`);
 			params.push(`search=${search}`);
@@ -241,6 +264,7 @@ const search = (search: string, limit: number = searchResultsLimit): Promise<Arr
 export {
 	checkOptions,
 	checkResponseStatus,
+	fetchAccountInfo,
 	fetchAchievementDescriptions,
 	fetchAchievements,
 	fetchData,

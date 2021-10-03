@@ -1,11 +1,13 @@
 // @flow
 import {
+	accountInfoResponse,
 	achievementDescriptionsResponse,
 	vehicleAchievementsResponse,
 	vehicleInfoResponse,
 	vehicleStatsResponse
 } from 'mocks/data';
 import {
+	toAccountInfo,
 	toAchievementDescriptions,
 	toArray,
 	toOptions,
@@ -15,6 +17,26 @@ import {
 } from 'helpers/mappers';
 
 describe('Mappers', () => {
+	describe('toAccountInfo', () => {
+		/**
+		 * Проверяет, что функция `toAccountInfo` преобразует общую статистику учетной записи, полученную с сервера,
+		 * к формату, используемому в приложении.
+		 */
+		it('maps account statistics.all.* properties and renames "damage_dealt" property into "damageDealt"', () => {
+			const expectedObject = {
+				battles: 1,
+				damageDealt: 1,
+				hits: 1,
+				shots: 1,
+				wins: 1
+			};
+
+			const mappedObject = toAccountInfo(accountInfoResponse.data[1]);
+
+			expect(mappedObject).toMatchObject(expectedObject);
+		});
+	});
+
 	describe('toAchievementDescriptions', () => {
 		/**
 		 * Проверяет, что функция `toAchievementDescriptions` преобразует информацию о достижениях, полученную с сервера,

@@ -1,5 +1,6 @@
 // @flow
 import {
+	accountInfoResponse,
 	achievementDescriptionsResponse,
 	searchResponse,
 	vehicleAchievementsResponse,
@@ -10,6 +11,7 @@ import {appId, paths} from 'constants/app';
 import {
 	checkOptions,
 	checkResponseStatus,
+	fetchAccountInfo,
 	fetchAchievementDescriptions,
 	fetchAchievements,
 	fetchData,
@@ -75,6 +77,31 @@ describe('Fetch data helpers', () => {
 			};
 
 			expect(() => checkResponseStatus(response)).toThrow();
+		});
+	});
+
+	describe('fetchAccountInfo', () => {
+		/**
+		 * Проверяет, что функция `fetchAccountInfo` получает общую статистику учетной записи
+		 * и преобразует ее к формату, используемому в приложении.
+		 */
+		it('fetches and shapes account info', () => {
+			const id = '1';
+
+			fetchMock.get(
+				getUrl(paths.accountInfo, normalizeOptions({id})),
+				Promise.resolve(accountInfoResponse)
+			);
+
+			const expectedResult = {
+				battles: 1,
+				damageDealt: 1,
+				hits: 1,
+				wins: 1,
+				shots: 1
+			};
+
+			expect(fetchAccountInfo(id)).resolves.toEqual(expectedResult);
 		});
 	});
 

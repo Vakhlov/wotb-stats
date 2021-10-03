@@ -14,6 +14,7 @@ describe('Record', () => {
 	 */
 	it('contains preview, title and achievements', () => {
 		const props = {
+			accountPercentage: 50,
 			achievementDescriptions,
 			achievements,
 			hitsPercentage: '77.46',

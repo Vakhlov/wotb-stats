@@ -42,6 +42,7 @@ const defaultRequestOptions: RequestOptions = {
  * @type {CommonMap}
  */
 const paths: CommonMap = {
+	'accountInfo': 'account/info',
 	'accountList': 'account/list',
 	'encyclopediaAchievements': 'encyclopedia/achievements',
 	'encyclopediaVehicles': 'encyclopedia/vehicles',

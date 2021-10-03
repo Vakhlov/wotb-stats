@@ -1,5 +1,19 @@
 // @flow
-import type {AchievementDescriptions, Option, VehicleAchievements, VehicleInfo, VehicleStats} from 'types';
+import type {AccountInfo, AchievementDescriptions, Option, VehicleAchievements, VehicleInfo, VehicleStats} from 'types';
+
+/**
+ * Преобразует общую статистику учетной записи, полученную с сервера, к типу `AccountInfo`, который используется
+ * в приложении.
+ * @param {Object} data - статистика учетной записи, полученная с сервера.
+ * @returns {AccountInfo} - возвращает данные типа `AccountInfo`.
+ */
+const toAccountInfo = (data: Object): AccountInfo => ({
+	battles: data.statistics.all.battles,
+	damageDealt: data.statistics.all.damage_dealt,
+	hits: data.statistics.all.hits,
+	shots: data.statistics.all.shots,
+	wins: data.statistics.all.wins
+});
 
 /**
  * Преобразует описания достижений, полученные с сервера, к типу `AchievementDescriptions`, который используется
@@ -91,6 +105,7 @@ const toVehiclesStats = (data: Array<Object>): Array<VehicleStats> => data.map((
 });
 
 export {
+	toAccountInfo,
 	toAchievementDescriptions,
 	toArray,
 	toOptions,

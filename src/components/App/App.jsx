@@ -1,18 +1,12 @@
 // @flow
 /** @jsx h */
 import {accountIdIsPermanent, countPermanentAccounts, logError} from 'helpers/common';
-import type {
-	Account,
-	AchievementDescriptions,
-	Option,
-	VehicleAchievements,
-	VehicleInfo,
-	VehicleStats
-} from 'types';
+import type {Account, AchievementDescriptions, Option, VehicleInfo, VehicleStats} from 'types';
 import {achievementFields, removedVehicles, searchResultsLimit, tempIdPattern, tempNamePattern} from 'constants/app';
 import cn from 'classnames';
 import {Component, h} from 'preact';
 import {
+	fetchAccountInfo,
 	fetchAchievements,
 	fetchAchievementDescriptions,
 	fetchVehicleInfo,
@@ -44,6 +38,7 @@ export class App extends Component<Props, State> {
 		const selectedAccountId = accounts.length ? accounts[0].id : null;
 
 		this.state = {
+			accountInfo: null,
 			accounts,
 			achievements: [],
 			achievementDescriptions: {},
@@ -70,14 +65,17 @@ export class App extends Component<Props, State> {
 
 		// загрузка достижений и статистики по технике учетной записи
 		if (currentAccount && accountIdIsPermanent(currentAccount)) {
+			// общая статистика учетной записи
+			const accountInfo = fetchAccountInfo(currentAccount);
+
 			// достижения
-			fetchAchievements(currentAccount)
-				.then(this.setAchievements)
-				.catch(logError);
+			const achievements = fetchAchievements(currentAccount);
 
 			// статистика по технике
-			fetchVehicleStatsByAccountId(currentAccount)
-				.then(this.setVehicleStats)
+			const vehicleStats = fetchVehicleStatsByAccountId(currentAccount);
+
+			Promise.all([accountInfo, achievements, vehicleStats])
+				.then(this.setAccountRelatedData)
 				.catch(logError);
 		}
 
@@ -98,16 +96,6 @@ export class App extends Component<Props, State> {
 
 	// Сеттеры отдельных свойств состояния. Оформлены как отдельные функции только ради повышения
 	// удобочитаемости загрузчика (`loadData`).
-	setAchievements = (achievements: Array<VehicleAchievements>): void => {
-		const {vehicleStats} = this.state;
-
-		// хрупкая логика здесь и в `setVehicleStats`: загрузка завершена когда есть и статистика, и достижения.
-		this.setState({
-			achievements,
-			loading: vehicleStats.length === 0 && achievements.length > 0
-		});
-	};
-
 	setAchievementDescriptions = (achievementDescriptions: AchievementDescriptions): void => {
 		this.setState({achievementDescriptions});
 	};
@@ -118,16 +106,6 @@ export class App extends Component<Props, State> {
 
 	setVehicleInfo = (vehicleInfo: VehicleInfo): void => {
 		this.setState({vehicleInfo});
-	};
-
-	setVehicleStats = (vehicleStats: Array<VehicleStats>): void => {
-		const {achievements} = this.state;
-
-		// хрупкая логика здесь и в `setAchievements`: загрузка завершена когда есть и статистика, и достижения.
-		this.setState({
-			vehicleStats,
-			loading: achievements.length === 0 && vehicleStats.length > 0
-		});
 	};
 
 	// Вспомогательные функции
@@ -196,6 +174,21 @@ export class App extends Component<Props, State> {
 		const {vehicleInfo} = this.state;
 		return vehicleInfo[vehicleId] ? vehicleInfo[vehicleId].preview : '';
 	}
+
+	/**
+	 * Сохраняет в состояние приложения информацию об общей статистике, достижениях на технике и статистике
+	 * по технике и сбрасывает признак загрузки.
+	 */
+	setAccountRelatedData = (data: Array<any>): void => {
+		const [accountInfo, achievements, vehicleStats] = data;
+
+		this.setState({
+			accountInfo,
+			achievements,
+			loading: false,
+			vehicleStats
+		});
+	};
 
 	/**
 	 * Сортирует массив объектов со статистикой по технике по выбранному ключу. Пока ключ не выбирается динамически
@@ -473,16 +466,22 @@ export class App extends Component<Props, State> {
 	 * @returns {Function} - возвращает функцию вывода отдельной записи.
 	 */
 	renderRecord = (achievementDescriptions: AchievementDescriptions) => (item: VehicleStats) => {
-		const {hitsPercentageString, id} = item;
+		const {accountInfo} = this.state;
+		const {hitsPercentage, hitsPercentageString, id} = item;
 		const achievements = this.getAchievements(id);
 		const name = this.getVehicleName(id);
 		const preview = this.getVehiclePreview(id);
 
+		const {hits, shots} = accountInfo;
+		const accountPercentage = (hits / shots) * 100;
+
 		return (
 			<Record
+				accountPercentage={accountPercentage}
 				achievementDescriptions={achievementDescriptions}
 				achievements={achievements}
-				hitsPercentage={hitsPercentageString}
+				hitsPercentage={hitsPercentage}
+				hitsPercentageString={hitsPercentageString}
 				key={id}
 				name={name}
 				preview={preview}

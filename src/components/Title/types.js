@@ -1,5 +1,10 @@
 // @flow
+import {PERCENTAGE_COLOR} from './constants';
+
+export type PercentageColor = $Keys<typeof PERCENTAGE_COLOR>;
+
 export type Props = {
-	hitsPercentage: string,
-	name: string
+	hitsPercentage: number,
+	name: string,
+	percentageColor: PercentageColor
 };

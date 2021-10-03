@@ -4,6 +4,14 @@ export type Account = {
 	name: string
 };
 
+export type AccountInfo = {
+	battles: number,
+	damageDealt: number,
+	hits: number,
+	shots: number,
+	wins: number
+};
+
 export type AchievementDescription = {
 	id: number,
 	image: string,

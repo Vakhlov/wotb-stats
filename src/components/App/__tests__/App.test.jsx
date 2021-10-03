@@ -1,6 +1,7 @@
 // @flow
 /** @jsx h */
 import {
+	accountInfoResponse,
 	achievementDescriptionsResponse,
 	noAchievementsResponse,
 	noVehicleStatsResponse,
@@ -71,6 +72,11 @@ describe('App', () => {
 
 		// подготовка ответов на запросы, инициируемые компонентом
 		fetchMock.get(
+			getUrl(paths.accountInfo, normalizeOptions({id: '1'})),
+			Promise.resolve(accountInfoResponse)
+		);
+
+		fetchMock.get(
 			getUrl(paths.tanksAchievements, normalizeOptions({id: '1'})),
 			Promise.resolve(vehicleAchievementsResponse)
 		);
@@ -132,6 +138,11 @@ describe('App', () => {
 	it('adds account to local storage when search result was clicked', async () => {
 		// подготовка ответов на запросы, инициируемые компонентом
 		fetchMock.get(
+			getUrl(paths.accountInfo, normalizeOptions({id: '1'})),
+			Promise.resolve(accountInfoResponse)
+		);
+
+		fetchMock.get(
 			getUrl(paths.tanksAchievements, normalizeOptions({id: '1'})),
 			Promise.resolve(vehicleAchievementsResponse)
 		);
@@ -176,6 +187,11 @@ describe('App', () => {
 		localStorage.setItem('selectedAccountId', '1');
 
 		// подготовка ответов на запросы, инициируемые компонентом
+		fetchMock.get(
+			getUrl(paths.accountInfo, normalizeOptions({id: '1'})),
+			Promise.resolve(accountInfoResponse)
+		);
+
 		fetchMock.get(
 			getUrl(paths.tanksAchievements, normalizeOptions({id: '1'})),
 			Promise.resolve(noAchievementsResponse)
